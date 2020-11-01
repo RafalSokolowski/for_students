@@ -12,6 +12,5 @@ public class MainHomework {
 
         // 9. Napisz mechanizm który w sposób rekurencyjny to usunie  +1 pkt
         new DeleteFolders(FOLDERS_ARE_IN).start();
-
     }
 }

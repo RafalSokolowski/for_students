@@ -20,7 +20,7 @@ public class DeleteFolders {
         }
     }
 
-    private String getListOfFilesByRecursion(File file) {
+    protected String getListOfFilesByRecursion(File file) {
         if (file.listFiles().length == 0) {
             return "\n" + file;
         } else {
@@ -28,7 +28,7 @@ public class DeleteFolders {
         }
     }
 
-    private boolean isFolderAndExists(@NonNull String path) {
+    protected boolean isFolderAndExists(@NonNull String path) {
         File folder = new File(path);
         return folder.exists() && folder.isDirectory();
     }

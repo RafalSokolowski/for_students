@@ -3,6 +3,7 @@ package day20201031.homework;
 import lombok.AllArgsConstructor;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static day20201031.homework.Colors.*;
@@ -13,16 +14,21 @@ public class MakeFolders {
     private final int amountOfFolders;
     private final String pathToMainFolder;
 
-    public void start() {
+    // returned type needed for tests purposes.
+    public File[] start() {
+        File[] folders = new File[amountOfFolders + 1];
+
         createMainFolderIfNeeded(pathToMainFolder).ifPresentOrElse(
                 folder -> {
                     int counter = 0;
-                    String path = folder.getAbsolutePath();
+                    String path = folder.getPath();
                     String alreadyExists = "";
+                    folders[counter] = folder;
 
                     while (counter++ < amountOfFolders) {
                         path += "\\Folder";
                         File innerFolder = new File(path);
+                        folders[counter] = innerFolder;
                         alreadyExists = innerFolder.mkdir() ? "new Folder was created" : "Folder already exists";
 
                         System.out.printf(BLUE + "%-3d" + RESET + " %s: %s\n",
@@ -34,9 +40,10 @@ public class MakeFolders {
 
                 }, () -> System.out.println("Cannot proceed")
         );
+        return folders;
     }
 
-    private Optional<File> createMainFolderIfNeeded(String path) {
+    protected Optional<File> createMainFolderIfNeeded(String path) {
         File folder = new File(path);
 
         if (folder.exists() && !folder.isDirectory()) {
