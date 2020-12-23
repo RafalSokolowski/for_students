@@ -1,0 +1,8 @@
+RR W
+R L
+RL T
+H
+L S
+LL T
+LR U
+LRR P
