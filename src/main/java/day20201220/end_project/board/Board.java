@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static day20201106.Const.*;
+// TODO: posprawdzeć importy i może rozdzielić Const na typy stałych (eg figury oddzielnie i kolory)?
+import static day20201220.end_project.utils.Const.*;
 
 @Getter
 public class Board {
@@ -109,7 +110,7 @@ public class Board {
     public void printBoard() {
         System.out.println("  " + A + "  " + B + " " + C + "  " + D + " " + E + "  " + F + " " + G + " " + H);
 
-        AtomicInteger counter = new AtomicInteger(8);
+        AtomicInteger counter = new AtomicInteger(1);
         board.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e -> {
             if (e.getKey().getX() == 0) System.out.print(counter);
 
@@ -118,19 +119,19 @@ public class Board {
 
                 // TODO: zrefaktorować to na oddzielne metody bo jest mess
                 if (oneFigure.getState() == 1 && oneFigure.getFigure() == 0 && oneFigure.getColor() == 0)
-                    System.out.print(" " + BLACK_FIGURE);
+                    System.out.print(" " + DARK_PAWN);
                 if (oneFigure.getState() == 1 && oneFigure.getFigure() == 0 && oneFigure.getColor() == 1)
-                    System.out.print(" " + WHITE_FIGURE);
+                    System.out.print(" " + LIGHT_PAWN);
                 if (oneFigure.getState() == 1 && oneFigure.getFigure() == 1 && oneFigure.getColor() == 0)
-                    System.out.print(" " + BLACK_QUEEN);
+                    System.out.print(" " + DARK_DAME);
                 if (oneFigure.getState() == 1 && oneFigure.getFigure() == 1 && oneFigure.getColor() == 1)
-                    System.out.print(" " + WHITE_QUEEN);
+                    System.out.print(" " + LIGHT_DAME);
 
             } else {
-                System.out.print(" " + (e.getValue().getColor() == 0 ? BLACK_FIELD : WHITE_FIELD));
+                System.out.print(" " + (e.getValue().getColor() == 0 ? DARK_FIELD : LIGHT_FIELD));
             }
 
-            if (e.getKey().getX() == 7) System.out.println(" " + counter.getAndDecrement());
+            if (e.getKey().getX() == 7) System.out.println(" " + counter.getAndIncrement());
         });
 
         System.out.println("  " + A + "  " + B + " " + C + "  " + D + " " + E + "  " + F + " " + G + " " + H);
@@ -174,6 +175,84 @@ public class Board {
         players.put(fifth.getPosition(), fifth);
         players.put(sixth.getPosition(), sixth);
 
+    }
+
+    // TODO: add loggers
+    public boolean movePiece(String from, String to) {
+
+        if (isPieceMovementStringInvalid(from) || isPieceMovementStringInvalid(to)) {
+            System.out.println(RED + "ERROR:" + RESET + " Cannot move as direction (from or to) is/are invalid... " +
+                    "double check from " + RED + from + RESET + " and " + RED + to + RESET + " values");
+            return false;
+        }
+
+        Position oldPosition = getPositionFromString(from);
+        if (!players.containsKey(oldPosition)) {
+            System.out.println(RED + "ERROR:" + RESET + " Cannot move from " + RED + from + RESET +
+                    " direction... there is no player's piece");
+            return false;
+        }
+
+        // TODO: sprawdzić czy nie chce się ruszyć na białe bo poruszamy się tylko po czarnych
+        Position newPosition = getPositionFromString(to);
+        if (!board.containsKey(newPosition)) {
+            System.out.println(RED + "ERROR:" + RESET + " Cannot move to " + RED + to + RESET +
+                    " direction... this direction does not exist on the board");
+            return false;
+        }
+        if (players.containsKey(newPosition)) {
+            System.out.println(RED + "ERROR:" + RESET + " Cannot move to " + RED + to + RESET +
+                    " direction... this direction is taken by the other piece");
+            return false;
+        }
+
+        int pieceColor = players.get(oldPosition).getColor();
+        if (isPieceMovementInvalid(oldPosition, newPosition, pieceColor)) {
+            System.out.println(RED + "ERROR:" + RESET + " this movement is not allowed, see above for details");
+            return false;
+        }
+
+        players.get(oldPosition).setPosition(newPosition);
+        players.put(newPosition, players.get(oldPosition));
+        players.remove(oldPosition);
+
+        return true;
+    }
+
+    // TODO: add implementation
+    private boolean isPieceMovementStringInvalid(String string) {
+        return false;
+    }
+
+    private Position getPositionFromString(String string) {
+        int y = Integer.parseInt(string.substring(1, 2)) - 1;
+        int x = string.charAt(0) - 65;
+        return new Position(y, x);
+    }
+
+    // TODO 1: rozważyć implementacje na bazie compareTo ?  TODO 2: sprawdzić ternary operator ewentualnie zamiast if
+    private boolean isPieceMovementInvalid(Position oldPosition, Position newPosition, int pieceColor) {
+        int oldPositionX = oldPosition.getX();
+        int oldPositionY = oldPosition.getY();
+        int newPositionX = newPosition.getX();
+        int newPositionY = newPosition.getY();
+
+        if (Math.abs(oldPositionY - newPositionY) != 1) {
+            System.out.println(RED + "ERROR add message:" + RESET + " too far for Y axis");
+            return true;
+        }
+
+        if (pieceColor == 0 && oldPositionX - newPositionX != -1) {      // Black player
+            System.out.println(RED + "ERROR add message:" + RESET + " possible reasons - too far for X axis, wrong direction or not diagonal in dark player case");
+            return true;
+        }
+
+        if (pieceColor == 1 && oldPositionX - newPositionX != 1) {     // White player
+            System.out.println(RED + "ERROR add message:" + RESET + "  possible reasons - too far for X axis, wrong direction or not diagonal in light player case");
+            return true;
+        }
+
+        return false;
     }
 
 }

@@ -6,8 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import static day20201122.homework.Const.BLUE;
-import static day20201122.homework.Const.RESET;
+import static day20201220.end_project.utils.Const.*;
 
 @Getter
 @Setter

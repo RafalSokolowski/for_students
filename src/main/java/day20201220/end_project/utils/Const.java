@@ -6,12 +6,12 @@ public class Const {
     public static final String BLUE = "\u001B[34m";
     public static final String RESET = "\u001B[0m";
 
-    public static final char WHITE_FIELD = '\u2B1B';    // TODO: zamienić białe z czarnymi - lepiej wygląda na mapie ?
-    public static final char BLACK_FIELD = '\u2B1C';
-    public static final char WHITE_FIGURE = '\u2659';
-    public static final char BLACK_FIGURE = '\u265F';
-    public static final char WHITE_QUEEN = '\u2655';
-    public static final char BLACK_QUEEN = '\u265B';
+    public static final char LIGHT_FIELD = '\u2B1B';    // TODO: zamienić białe z czarnymi - lepiej wygląda na mapie ?
+    public static final char DARK_FIELD = '\u2B1C';
+    public static final char LIGHT_PAWN = '\u2659';
+    public static final char DARK_PAWN = '\u265F';
+    public static final char LIGHT_DAME = '\u2655';
+    public static final char DARK_DAME = '\u265B';
 
     public static final char A = '\u0041';
     public static final char B = '\u0042';

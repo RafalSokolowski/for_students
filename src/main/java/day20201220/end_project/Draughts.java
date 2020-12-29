@@ -5,7 +5,7 @@ import day20201220.end_project.board.Position;
 import day20201220.end_project.figure.OneFigure;
 import day20201220.end_project.figure.SixFigures;
 
-public class Main {
+public class Draughts {
     public static void main(String[] args) {
 //        char whiteField = '\u2B1B';
 //        char blackField = '\u2B1C';
@@ -63,6 +63,8 @@ public class Main {
 //        board.printMap();
         board.printBoard();
 
+        board.movePiece("B3","C4");
+        board.printBoard();
 
 //        System.out.println(playerBlack.getFirstSix());
 //        board.placeFiguresFromLong(playerBlack.getFirstSix());

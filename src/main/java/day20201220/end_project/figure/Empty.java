@@ -1,14 +1,10 @@
 package day20201220.end_project.figure;
 
-import day20201220.end_project.board.Position;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import static day20201122.homework.Const.BLUE;
-import static day20201122.homework.Const.RESET;
-import static day20201220.end_project.utils.Const.BLACK_FIELD;
-import static day20201220.end_project.utils.Const.WHITE_FIELD;
+import static day20201220.end_project.utils.Const.*;
 
 @Getter
 @EqualsAndHashCode
@@ -44,7 +40,7 @@ public class Empty implements OnTheBoard, Comparable<Empty> {
         String stringY = Integer.toBinaryString(y);
         String stringX = Integer.toBinaryString(x);
 
-        return (color == 0 ? BLACK_FIELD : WHITE_FIELD) + " " +
+        return (color == 0 ? DARK_FIELD : LIGHT_FIELD) + " " +
                 (stringY.length() == 3 ? stringY : stringY.length() == 2 ? "0" + stringY : "00" + stringY) + " " +
                 (stringX.length() == 3 ? stringX : (stringX.length() == 2) ? "0" + stringX : "00" + stringX);
     }
