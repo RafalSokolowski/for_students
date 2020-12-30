@@ -60,10 +60,116 @@ public class Draughts {
         Player black = board.initializeBlackPlayers();
         Player white = board.initializeWhitePlayer();
 
-//        board.printMap();
+        System.out.println("\n0. Phase - start no movements");
         board.printBoard();
 
+        System.out.println("\n1. Phase - light B3 -> C4");
         board.movePiece("B3","C4");
+        board.printBoard();
+
+        System.out.println("\n2. Phase - dark E6 -> F5");
+        board.movePiece("E6","F5");
+        board.printBoard();
+
+        System.out.println("\n3. Phase - light C4 -> D5");
+        board.movePiece("C4","D5");
+        board.printBoard();
+
+        System.out.println("\n4. Phase - dark C6 -> E4");
+        board.movePiece("C6","E4");
+        board.printBoard();
+
+        System.out.println("\n5. Phase - intentional mistake - capturing is mandatory");
+        board.movePiece("F3","G4");
+        board.printBoard();
+
+        System.out.println("\n5. Phase - repeat - light F3 -> D5");
+        board.movePiece("F3","D5");
+        board.printBoard();
+
+        System.out.println("\n6. Phase - dark D7 -> C6");
+        board.movePiece("D7","C6");
+        board.printBoard();
+
+        System.out.println("\n7. Phase");
+        board.movePiece("D5","E6");
+        board.printBoard();
+
+        System.out.println("\n8. Phase");
+        board.movePiece("F5","D7");
+        board.printBoard();
+
+        System.out.println("\n9. Phase");
+        board.movePiece("D3","E4");
+        board.printBoard();
+
+        System.out.println("\n10. Phase");
+        board.movePiece("A6","B5");
+        board.printBoard();
+
+        System.out.println("\n11. Phase");
+        board.movePiece("C2","D3");
+        board.printBoard();
+
+        System.out.println("\n12. Phase");
+        board.movePiece("B5","A4");
+        board.printBoard();
+
+        System.out.println("\n12. Phase");
+        board.movePiece("E4","F5");
+        board.printBoard();
+
+        System.out.println("\n13. Phase");
+        board.movePiece("G6","E4");
+        board.printBoard();
+
+        System.out.println("\n14. Phase");
+        board.movePiece("E4","C2");
+//        board.movePiece("D3","F5"); /// <- błąd : (
+        board.printBoard();
+
+        System.out.println("\n15. Phase");
+        board.movePiece("B1","D3");
+        board.printBoard();
+
+        System.out.println("\n16. Phase");
+        board.movePiece("B7","A6");
+        board.printBoard();
+
+        System.out.println("\n17. Phase");
+        board.movePiece("D1","C2");
+        board.printBoard();
+
+        System.out.println("\n18. Phase");
+        board.movePiece("D3","E4");
+        board.printBoard();
+
+        System.out.println("\n18. Phase");
+        board.movePiece("C6","B5");
+        board.printBoard();
+
+        System.out.println("\n19. Phase");
+        board.movePiece("H3","G4");
+        board.printBoard();
+
+        System.out.println("\n19. Phase"); // <- białe ruszają się dwa razy !!!!
+        board.movePiece("G4","H5");
+        board.printBoard();
+
+        System.out.println("\n20. Phase"); // <- białe ruszają się trzy razy !!!!
+        board.movePiece("H5","G6");
+        board.printBoard();
+
+        System.out.println("\n21. Phase");
+        board.movePiece("H7","F5");
+        board.printBoard();
+
+        System.out.println("\n22. Phase");
+        board.movePiece("F5","D3");
+        board.printBoard();
+
+        System.out.println("\n22. Phase");
+        board.movePiece("D3","B1");
         board.printBoard();
 
 //        System.out.println(playerBlack.getFirstSix());

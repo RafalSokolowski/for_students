@@ -13,6 +13,9 @@ public class Const {
     public static final char LIGHT_DAME = '\u2655';
     public static final char DARK_DAME = '\u265B';
 
+    public static final int DARK_COLOR = 0;
+    public static final int LIGHT_COLOR = 1;
+
     public static final char A = '\u0041';
     public static final char B = '\u0042';
     public static final char C = '\u0043';
