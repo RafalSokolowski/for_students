@@ -8,13 +8,17 @@ public class Const {
 
     public static final char LIGHT_FIELD = '\u2B1B';    // TODO: zamienić białe z czarnymi - lepiej wygląda na mapie ?
     public static final char DARK_FIELD = '\u2B1C';
-    public static final char LIGHT_PAWN = '\u2659';
-    public static final char DARK_PAWN = '\u265F';
-    public static final char LIGHT_DAME = '\u2655';
-    public static final char DARK_DAME = '\u265B';
+    public static final char DARK_PAWN = '\u2659';
+    public static final char LIGHT_PAWN = '\u265F';
+    public static final char DARK_DAME = '\u2655';
+    public static final char LIGHT_DAME = '\u265B';
 
-    public static final int DARK_COLOR = 0;
-    public static final int LIGHT_COLOR = 1;
+    public static final int DARK = 0;
+    public static final int LIGHT = 1;
+    public static final int PAWN = 0;
+    public static final int DAME = 1;
+    public static final int ELIMINATED = 0;
+    public static final int PLAYING = 1;
 
     public static final char A = '\u0041';
     public static final char B = '\u0042';
