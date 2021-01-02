@@ -239,7 +239,7 @@ public class Board {
 
                 updatePlayersMapAndStatus(positionFrom, positionTo);
 
-                continueCapturingIfPossible = canContinueCapturing(positionTo, PAWN);
+                continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
                 if (continueCapturingIfPossible) {
                     capturingMandatoryByOpponent = true;
                 }
@@ -302,7 +302,7 @@ public class Board {
 //                players.put(positionTo, players.get(positionFrom));
 //                players.remove(positionFrom);
 
-                continueCapturingIfPossible = canContinueCapturing(positionTo, PAWN);
+                continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
                 if (continueCapturingIfPossible) {
                     System.out.println(RED + "Continue capturing is possible!!!" + RESET);
                     capturingMandatoryByOpponent = true;
@@ -586,8 +586,10 @@ public class Board {
 
         if (!opponentDames.isEmpty()) {
             opponentDames.forEach((k, v) -> {
-                List<Position> emptyFieldsAfter = getEmptyFieldsAfter(k, justMovedTo);
-                getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
+//                List<Position> emptyFieldsAfter = getEmptyFieldsAfter(k, justMovedTo);
+//                getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
+
+                List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
 
                 if (arePositionsOnTheSameDiagonal(justMovedTo, k) && noOtherPiecesInBetween(justMovedTo, k) && !emptyFieldsAfter.isEmpty()) {
 
@@ -600,8 +602,6 @@ public class Board {
                             " because capturing is mandatory"));
 
 //                    System.out.println(RED + getFieldsInBetween(k, justMovedTo) + RESET);
-
-
 //                    mandatoryPosition.clear();
                 }
             });
@@ -693,14 +693,17 @@ public class Board {
 
     private List<Position> getEmptyFieldsAfterByPossibleCapturing(Position positionDame, Position justMovedTo) {
         List<Position> emptyFieldsAfter = getEmptyFieldsAfter(positionDame, justMovedTo);
+        int opponentColor = players.get(justMovedTo).getColor();
+        List<Position> result = new ArrayList<>();
 
         emptyFieldsAfter.forEach(p -> {
-            if (canContinueCapturing(p, DAME)) {
+            if (canContinueCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
+                result.add(p);
                 System.out.println("Can continue capturing after dame movement: " + RED + p + RESET);
             }
         });
 
-        return Collections.emptyList();
+        return result;
     }
 
     private List<Position> getEmptyFieldsAfter(Position positionDame, Position justMovedTo) {
@@ -765,27 +768,92 @@ public class Board {
 
 ///////////////////////////////////////// CAN CONTINUE CAPTURING AFTER MOVEMENT ////////////////////////////////////////////////////
 
-    private boolean canContinueCapturing(Position position, int pawnOrDame) {
+    private boolean canContinueCapturingByDame(Position position, Position isGoingToBeRemoved, int pawnOrDame, int opponentColor) {
 
         if (isDameMoving(pawnOrDame)) {
-            System.out.println(RED + "DAME IS MOVING" + RESET);
+            List<List<Position>> allDiagonals = getDiagonalsSplitByPosition(position);
 
+            System.out.println(BLUE + position + RESET);
+//            allDiagonals.forEach(i -> System.out.println(RED + i + RESET));
 
+            for (List<Position> partDiagonal : allDiagonals) {
+                System.out.println(RED + partDiagonal + RESET);
+                if (partDiagonal.size() >= 2) {
+                    for (int i = 0; i < partDiagonal.size() - 1; i++) {
+//                        System.out.println(YELLOW + players.containsKey(partDiagonal.get(i)) + RESET);
+//                        System.out.println(YELLOW + (players.get(partDiagonal.get(i)).getColor()) + RESET);
+//                        System.out.println(YELLOW + !players.containsKey(partDiagonal.get(i + 1)) + RESET);
 
-            return true;
+                        if (!partDiagonal.get(i).equals(isGoingToBeRemoved) &&
+                                players.containsKey(partDiagonal.get(i)) &&
+                                players.get(partDiagonal.get(i)).getColor() == opponentColor  &&
+                                !players.containsKey(partDiagonal.get(i + 1))) {
+                            System.out.println(YELLOW + partDiagonal.get(i) + RESET);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
 
-        } else {
-            Position positionLeftTop = new Position(position.getY() + 1, position.getX() - 1);
-            Position positionLeftTopDiagonal = new Position(position.getY() + 2, position.getX() - 2);
+//        else {
+//            Position positionLeftTop = new Position(position.getY() + 1, position.getX() - 1);
+//            Position positionLeftTopDiagonal = new Position(position.getY() + 2, position.getX() - 2);
+//
+//            Position positionRightTop = new Position(position.getY() + 1, position.getX() + 1);
+//            Position positionRightTopDiagonal = new Position(position.getY() + 2, position.getX() + 2);
+//
+//            Position positionLeftBottom = new Position(position.getY() - 1, position.getX() - 1);
+//            Position positionLeftBottomDiagonal = new Position(position.getY() - 2, position.getX() - 2);
+//
+//            Position positionRightBottom = new Position(position.getY() - 1, position.getX() + 1);
+//            Position positionRightBottomDiagonal = new Position(position.getY() - 2, position.getX() + 2);
+//
+////        int playerSide = players.get(justMovedTo).getColor();
+////
+////        if (players.containsKey(positionLeftTop) &&
+////                players.get(positionLeftTop).getColor() != playerSide &&
+////                positionRightBottom.isValid() &&
+////                !players.containsKey(positionRightBottom)
+////        )
+////        if (isCapturingAllowed(positionLeftTop, positionRightBottom, playerSide)) {
+////            System.out.println(BLUE + "RULE:" + RESET + " " + (playerSide == DARK_COLOR ? "Dark" : "Light") +
+////                    " player needs to move from " + BLUE + positionLeftTop + RESET +
+////                    " to " + BLUE + positionRightBottom + RESET + " because capturing is mandatory");
+//////            capturingMandatory = true;
+////            mandatoryPosition = positionRightBottom;
+////            pieceToBeRemoved = justMovedTo;
+////            return true;
+////        }
+//            boolean flag1 = ifContinuingCapturingMandatory(positionLeftTop, positionLeftTopDiagonal, position);
+//            boolean flag2 = ifContinuingCapturingMandatory(positionRightBottom, positionRightBottomDiagonal, position);
+//
+//            boolean flag3 = ifContinuingCapturingMandatory(positionRightTop, positionRightTopDiagonal, position);
+//            boolean flag4 = ifContinuingCapturingMandatory(positionLeftBottom, positionLeftBottomDiagonal, position);
+//
+////            if (flag1 || flag2 || flag3 || flag4) {
+////                System.out.println(RED + flag1 + ", " + flag2 + ", " + flag3 + ", " + flag4 + ", " + RESET);
+////                return true;
+////            }
+////            return false;
+//            return flag1 || flag2 || flag3 || flag4;
+//
+//        }
+    }
 
-            Position positionRightTop = new Position(position.getY() + 1, position.getX() + 1);
-            Position positionRightTopDiagonal = new Position(position.getY() + 2, position.getX() + 2);
+    private boolean canContinueCapturingByPawn (Position position) {
+        Position positionLeftTop = new Position(position.getY() + 1, position.getX() - 1);
+        Position positionLeftTopDiagonal = new Position(position.getY() + 2, position.getX() - 2);
 
-            Position positionLeftBottom = new Position(position.getY() - 1, position.getX() - 1);
-            Position positionLeftBottomDiagonal = new Position(position.getY() - 2, position.getX() - 2);
+        Position positionRightTop = new Position(position.getY() + 1, position.getX() + 1);
+        Position positionRightTopDiagonal = new Position(position.getY() + 2, position.getX() + 2);
 
-            Position positionRightBottom = new Position(position.getY() - 1, position.getX() + 1);
-            Position positionRightBottomDiagonal = new Position(position.getY() - 2, position.getX() + 2);
+        Position positionLeftBottom = new Position(position.getY() - 1, position.getX() - 1);
+        Position positionLeftBottomDiagonal = new Position(position.getY() - 2, position.getX() - 2);
+
+        Position positionRightBottom = new Position(position.getY() - 1, position.getX() + 1);
+        Position positionRightBottomDiagonal = new Position(position.getY() - 2, position.getX() + 2);
 
 //        int playerSide = players.get(justMovedTo).getColor();
 //
@@ -803,25 +871,50 @@ public class Board {
 //            pieceToBeRemoved = justMovedTo;
 //            return true;
 //        }
-            boolean flag1 = ifContinuingCapturingMandatory(positionLeftTop, positionLeftTopDiagonal, position);
-            boolean flag2 = ifContinuingCapturingMandatory(positionRightBottom, positionRightBottomDiagonal, position);
+        boolean flag1 = ifContinuingCapturingMandatory(positionLeftTop, positionLeftTopDiagonal, position);
+        boolean flag2 = ifContinuingCapturingMandatory(positionRightBottom, positionRightBottomDiagonal, position);
 
-            boolean flag3 = ifContinuingCapturingMandatory(positionRightTop, positionRightTopDiagonal, position);
-            boolean flag4 = ifContinuingCapturingMandatory(positionLeftBottom, positionLeftBottomDiagonal, position);
+        boolean flag3 = ifContinuingCapturingMandatory(positionRightTop, positionRightTopDiagonal, position);
+        boolean flag4 = ifContinuingCapturingMandatory(positionLeftBottom, positionLeftBottomDiagonal, position);
 
 //            if (flag1 || flag2 || flag3 || flag4) {
 //                System.out.println(RED + flag1 + ", " + flag2 + ", " + flag3 + ", " + flag4 + ", " + RESET);
 //                return true;
 //            }
 //            return false;
-            return flag1 || flag2 || flag3 || flag4;
-
-        }
+        return flag1 || flag2 || flag3 || flag4;
     }
 
-//    private List<Position> getDiagonals (Position position) {
-//
-//    }
+    private List<List<Position>> getDiagonalsSplitByPosition(Position position) {
+        List<List<Position>> result = new ArrayList<>();
+
+        List<Position> result1 = getIterations(position, 1, 1);
+        List<Position> result2 = getIterations(position, -1, 1);
+        List<Position> result3 = getIterations(position, 1, -1);
+        List<Position> result4 = getIterations(position, -1, -1);
+
+        result.add(result1);
+        result.add(result2);
+        result.add(result3);
+        result.add(result4);
+
+        return result;
+    }
+
+    private List<Position> getIterations(Position position, int deltaX, int deltaY) {
+        int positionY = position.getY();
+        int positionX = position.getX();
+
+        List<Position> result = new ArrayList<>();
+        Position iteration = new Position(positionY + deltaY, positionX + deltaX);
+
+        while (iteration.isValid()) {
+            result.add(iteration);
+            iteration = new Position(iteration.getY() + deltaY, iteration.getX() + deltaX);
+        }
+
+        return result;
+    }
 
     private boolean ifContinuingCapturingMandatory(Position toBeCaptured, Position positionAfterCapturing, Position justMovedTo) {
         int playerSide = players.get(justMovedTo).getColor();

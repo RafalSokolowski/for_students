@@ -229,8 +229,49 @@ public class Draughts {
         board.movePieceByString("B7","E4");
         board.printBoard();
 
+        System.out.println("\n37. Phase ");
+        board.movePieceByString("B7","F3");
+        board.printBoard();
 
+        System.out.println("\n38. Phase ");
+        board.movePieceByString("F3","D1");
+        board.printBoard();
 
+        System.out.println("\n39. Phase ");
+        board.movePieceByString("F7","E6");
+        board.printBoard();
+
+        System.out.println("\n40. Phase ");
+        board.movePieceByString("C8","B7");
+        board.printBoard();
+
+        System.out.println("\n41. Phase ");
+        board.movePieceByString("A6","B5");
+        board.printBoard();
+
+        System.out.println("\n42. Phase ");
+        board.movePieceByString("E6","F5");
+        board.printBoard();
+
+        System.out.println("\n43. Phase ");
+        board.movePieceByString("B7","F3");
+        board.printBoard();
+
+        System.out.println("\n44. Phase ");
+        board.movePieceByString("G4","E6");
+        board.printBoard();
+
+        System.out.println("\n45. Phase ");
+        board.movePieceByString("E6","C8");
+        board.printBoard();
+
+        System.out.println("\n46. Phase ");
+        board.movePieceByString("C8","A6");
+        board.printBoard();
+
+        System.out.println("\n47. Phase ");
+        board.movePieceByString("A6","F1");
+        board.printBoard();
 //        System.out.println(playerBlack.getFirstSix());
 //        board.placeFiguresFromLong(playerBlack.getFirstSix());
 //

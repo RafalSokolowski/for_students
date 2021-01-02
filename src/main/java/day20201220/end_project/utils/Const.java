@@ -5,6 +5,7 @@ public class Const {
     public static final String RED = "\u001B[31m";
     public static final String BLUE = "\u001B[34m";
     public static final String RESET = "\u001B[0m";
+    public static final String YELLOW = "\u001B[33m";
 
     public static final char LIGHT_FIELD = '\u2B1B';    // TODO: zamienić białe z czarnymi - lepiej wygląda na mapie ?
     public static final char DARK_FIELD = '\u2B1C';
@@ -15,6 +16,7 @@ public class Const {
 
     public static final int DARK = 0;
     public static final int LIGHT = 1;
+    public static final int COLOR_DOES_NOT_MATTER_HERE = -1;
     public static final int PAWN = 0;
     public static final int DAME = 1;
     public static final int ELIMINATED = 0;
