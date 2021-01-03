@@ -269,7 +269,7 @@ public class Draughts {
         board.movePieceByString("C8","A6");
         board.printBoard();
 
-        System.out.println("\n47. Phase ");
+        System.out.println("\n47. Phase - A6 -> F1");
         board.movePieceByString("A6","F1");
         board.printBoard();
 //        System.out.println(playerBlack.getFirstSix());

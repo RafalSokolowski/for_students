@@ -5,10 +5,8 @@ import day20201220.end_project.figure.Empty;
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
 import day20201220.end_project.figure.SixFigures;
-import javafx.geometry.Pos;
 import lombok.Getter;
 
-import java.sql.SQLOutput;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -36,6 +34,8 @@ public class Board {
         this.mandatoryPosition = new ArrayList<>();
         this.pieceToBeRemoved = new ArrayList<>();
     }
+
+    ////////////////////////////////////////////// INITIALIZATION ////////////////////////////////////////////////////////////
 
     public void initializeBoard() {
         for (int y = 0; y < 8; y++) {
@@ -152,27 +152,6 @@ public class Board {
                 .forEach((k, v) -> System.out.printf("%s = #%2d piece(s)\n", (k == 0 ? "Dark " : "Light"), v));
     }
 
-//    public void print() {
-//
-//        System.out.println("  " + A + " " + B + " " + C + " " + D + " " + E + " " + F + " " + G + " " + H);
-//        for (int i = 0; i < 8; i++) {
-//            System.out.print(8 - i);
-//            for (int j = 0; j < 8; j++) {
-//                if (i % 2 == 0 && j % 2 != 0 || i % 2 != 0 && j % 2 == 0) {
-//                    System.out.print(" " + WHITE_FIELD);
-//                } else {
-//                    System.out.print(" " + BLACK_FIELD);
-//                }
-//            }
-//            System.out.println(" " + (8 - i));
-//        }
-//        System.out.println("  " + A + " " + B + " " + C + " " + D + " " + E + " " + F + " " + G + " " + H);
-//    }
-
-//    public Map<Position, OnTheBoard> sort (Map<Position, OnTheBoard> map) {
-//        return map.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap());
-//    }
-
     public void placeFiguresFromLong(long number) {
         SixFigures sixFigures = new SixFigures(number);
 
@@ -192,82 +171,6 @@ public class Board {
 
     }
 
-    //////////////////////  MOVEMENT - try new approach  ///////////////////////////////////////////////////////////////////////////////////////
-
-    public boolean movePieceByString_(String stringFrom, String stringTo) {
-
-        if (areStringMoveInvalid(stringFrom, stringTo)) {
-            System.out.println(RED + "ERROR:" + RESET + " Cannot move as direction (from or to) is/are not valid... " +
-                    "double check from " + RED + stringFrom + RESET + " and to " + RED + stringTo + RESET + " values");
-            return false;
-        }
-
-        Position positionFrom = getPositionFromString(stringFrom);
-        Position positionTo = getPositionFromString(stringTo);
-        if (isMovementPositionsAreNotCorrect(positionFrom, positionTo)) {
-            return false;
-        }
-
-        OneFigure piece = players.get(positionFrom);
-
-        if (isDameMoving(piece.getFigure())) {
-            System.out.println(RED + "Dame is moving - implement that :)");
-            // Dame is moving
-        } else {
-            movePawnByPosition(positionFrom, positionTo);   // Pawn is moving
-        }
-
-
-        return true;
-    }
-
-    public boolean movePawnByPosition(Position positionFrom, Position positionTo) {
-        if (capturingMandatoryByOpponent) {
-            if (!mandatoryPosition.contains(positionTo)) {
-                System.out.println(RED + "ERROR:" + RESET + " This move" + RED + " was not proceed" + RESET +
-                        " because capturing / continue capturing is mandatory... try again according to the " +
-                        BLUE + "RULE" + RESET + " mentioned above");
-                return false;
-            } else {
-                capturingMandatoryByOpponent = false;
-                Position pieceToBeRemovedByIndexOfPositionToInMandatoryPositions = pieceToBeRemoved.get(mandatoryPosition.indexOf(positionTo));
-                players.get(pieceToBeRemovedByIndexOfPositionToInMandatoryPositions).setState(0);
-                players.remove(pieceToBeRemovedByIndexOfPositionToInMandatoryPositions);
-
-                mandatoryPosition.clear();
-                pieceToBeRemoved.clear();
-
-                updatePlayersMapAndStatus(positionFrom, positionTo);
-
-                continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
-                if (continueCapturingIfPossible) {
-                    capturingMandatoryByOpponent = true;
-                }
-            }
-        } else {
-            if (isMovementPositionsAreNotCorrect(positionFrom, positionTo)) {
-                return false;
-            }
-            updatePlayersMapAndStatus(positionFrom, positionTo);
-        }
-
-        if (!continueCapturingIfPossible) {
-            canBeCapturedAfterMovement(positionTo);
-        }
-        continueCapturingIfPossible = false;
-
-        OneFigure piece = players.get(positionTo);
-        if (shouldWeChangePieceToDame(piece.getColor(), piece.getPosition().getY())) {
-            String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
-            System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
-                    " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
-                    "... congratulation " + playersColor + " player");
-            changePawnToDame(piece);
-        }
-        return true;
-    }
-
-
     //////////////////////  MOVEMENT - old working approach ///////////////////////////////////////////////////////////////////////////////////////
 
     // TODO: add loggers
@@ -282,7 +185,6 @@ public class Board {
 //        System.out.println(RED + (players.get(positionFrom).getColor() == DARK_COLOR ? "Dark" : "Light") + RESET);
 
         if (capturingMandatoryByOpponent) {
-//            if (!to.equalsIgnoreCase(mandatoryPosition.toString())) {
             if (!mandatoryPosition.contains(positionTo)) {
                 System.out.println(RED + "ERROR:" + RESET + " This move" + RED + " was not proceed" + RESET +
                         " because capturing / continue capturing is mandatory... try again according to the " +
@@ -298,11 +200,19 @@ public class Board {
                 pieceToBeRemoved.clear();
 
                 updatePlayersMapAndStatus(positionFrom, positionTo);
-//                players.get(positionFrom).setPosition(positionTo);
-//                players.put(positionTo, players.get(positionFrom));
-//                players.remove(positionFrom);
 
-                continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
+//                continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
+
+                /////////////////
+                int pawnOrDame = players.get(positionTo).getFigure();
+                int playerColor = players.get(positionTo).getColor();
+                if (isDameMoving(pawnOrDame)) {
+                    continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
+                } else {
+                    continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
+                }
+                /////////////////
+
                 if (continueCapturingIfPossible) {
                     System.out.println(RED + "Continue capturing is possible!!!" + RESET);
                     capturingMandatoryByOpponent = true;
@@ -315,45 +225,11 @@ public class Board {
                 return false;
             }
 
-//            if (areStringMoveInvalid(stringFrom, stringTo)) {
-//                System.out.println(RED + "ERROR:" + RESET + " Cannot move as direction (from or to) is/are not valid... " +
-//                        "double check from " + RED + stringFrom + RESET + " and to " + RED + stringTo + RESET + " values");
-//                return false;
-//            }
-//
-//            if (ifPieceFromNotOnTheBoard(positionFrom)) {
-//                System.out.println(RED + "ERROR:" + RESET + " Cannot move from " + RED + stringFrom + RESET +
-//                        " direction... there is no player's piece");
-//                return false;
-//            }
-//
-//            if (isPositionNotExists(positionTo)) {
-//                System.out.println(RED + "ERROR:" + RESET + " Cannot move to " + RED + stringTo + RESET +
-//                        " direction... this direction does not exist on the board");
-//                return false;
-//            }
-//            if (isPositionTakenByOtherPiece(positionTo)) {
-//                System.out.println(RED + "ERROR:" + RESET + " Cannot move to " + RED + stringTo + RESET +
-//                        " direction... this direction is taken by the other piece");
-//                return false;
-//            }
-//
-//            int pieceColor = players.get(positionFrom).getColor();
-//            if (isPieceMovementInvalid(positionFrom, positionTo, pieceColor)) {
-//                System.out.println(RED + "ERROR:" + RESET + " this movement is not allowed and "
-//                        + RED + "was not proceed" + RESET + ", see above for details");
-//                return false;
-//            }
-
             updatePlayersMapAndStatus(positionFrom, positionTo);
-
-//            players.get(positionFrom).setPosition(positionTo);
-//            players.put(positionTo, players.get(positionFrom));
-//            players.remove(positionFrom);
 
         }
         if (!continueCapturingIfPossible) {
-            canBeCapturedAfterMovement(positionTo);
+            canBeCapturedAfterMovementByDameOrPawn(positionTo);
         }
         continueCapturingIfPossible = false;
 
@@ -436,7 +312,7 @@ public class Board {
 
     private boolean isMovementPositionsAreNotCorrect(Position positionFrom, Position positionTo) {
         if (positionFrom.equals(positionTo)) {
-            System.out.println(RED + "ERROR add message:" + RESET + " you are not moving... positions form and to are equal");
+            System.out.println(RED + "ERROR add message:" + RESET + " you are not moving... positions form and to are equal :)");
             return true;
         }
 
@@ -576,65 +452,107 @@ public class Board {
         return players.containsKey(position);
     }
 
-////////////////////////////////////////////// CHECK CAPTURING BY THE OPPONENT AFTER MOVEMENT ////////////////////////////////
+/////////////////////////////////////// CHECK CAPTURING BY THE OPPONENT AFTER MOVEMENT /////////////////////////////////////////////////////
 
-    private void canBeCapturedAfterMovement(Position justMovedTo) {
+    private void canBeCapturedAfterMovementByDameOrPawn(Position justMovedTo) {
 
+//        int playerColor = players.get(justMovedTo).getColor();
+//        String opponentColor = playerColor == DARK ? "Light" : "Dark";
+//        Map<Position, OneFigure> opponentDames = getOpponentDames(playerColor);
+//
+//        if (!opponentDames.isEmpty()) {
+//            opponentDames.forEach((k, v) -> {
+//                continueCapturingAfterMovementByDame(justMovedTo, k, opponentColor);
+////                if (arePositionsOnTheSameDiagonal(justMovedTo, k) && noOtherPiecesInBetween(justMovedTo, k)) {
+////                    List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
+////                    if (!emptyFieldsAfter.isEmpty()) {
+////                        mandatoryPosition.addAll(emptyFieldsAfter);
+////                        pieceToBeRemoved.add(justMovedTo);
+////                        capturingMandatoryByOpponent = true;
+////
+////                        mandatoryPosition.forEach(p -> System.out.println(BLUE + "RULE:" + RESET + " " + opponentColor +
+////                                " player Dame mandatory movement from " + BLUE + k + RESET + " to " + BLUE + p + RESET +
+////                                " because capturing is mandatory"));
+////                    }
+////                }
+//
+//                ////////////////////////////////// FIRSt APPORAACH
+//
+////                List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
+////
+////                if (arePositionsOnTheSameDiagonal(justMovedTo, k) && noOtherPiecesInBetween(justMovedTo, k) && !emptyFieldsAfter.isEmpty()) {
+////                    mandatoryPosition.addAll(emptyFieldsAfter);
+////                    pieceToBeRemoved.add(justMovedTo);
+////                    capturingMandatoryByOpponent = true;
+////
+////                    mandatoryPosition.forEach(p -> System.out.println(BLUE + "RULE:" + RESET + " " + opponentColor +
+////                            " player Dame mandatory movement from " + BLUE + k + RESET + " to " + BLUE + p + RESET +
+////                            " because capturing is mandatory"));
+////                }
+//            });
+//        }
+        continueCapturingAfterMovementByDames(justMovedTo);
+
+        continueCapturingAfterMovementByPawns(justMovedTo);
+    }
+
+    /////////////////////////////// canBeCapturedAfterMovementByDame ////////////////////////////////////////////////////////////////
+
+//    private void continueCapturingAfterMovementByDame(Position justMovedTo, Position positionDame, String opponentColor) {
+//        if (arePositionsOnTheSameDiagonal(justMovedTo, positionDame) && noOtherPiecesInBetween(justMovedTo, positionDame)) {
+//            List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(positionDame, justMovedTo);
+//            if (!emptyFieldsAfter.isEmpty()) {
+//                mandatoryPosition.addAll(emptyFieldsAfter);
+//                pieceToBeRemoved.add(justMovedTo);
+//                capturingMandatoryByOpponent = true;
+//
+//                mandatoryPosition.forEach(p -> System.out.println(BLUE + "RULE:" + RESET + " " + opponentColor +
+//                        " player Dame mandatory movement from " + BLUE + positionDame + RESET + " to " + BLUE + p + RESET +
+//                        " because capturing is mandatory"));
+//            }
+//        }
+//    }
+
+    //////////////////////////
+    private boolean continueCapturingAfterMovementByDames(Position justMovedTo) {
         int playerColor = players.get(justMovedTo).getColor();
         String opponentColor = playerColor == DARK ? "Light" : "Dark";
         Map<Position, OneFigure> opponentDames = getOpponentDames(playerColor);
 
-        if (!opponentDames.isEmpty()) {
-            opponentDames.forEach((k, v) -> {
-//                List<Position> emptyFieldsAfter = getEmptyFieldsAfter(k, justMovedTo);
-//                getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
-
-                List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(k, justMovedTo);
-
-                if (arePositionsOnTheSameDiagonal(justMovedTo, k) && noOtherPiecesInBetween(justMovedTo, k) && !emptyFieldsAfter.isEmpty()) {
-
-                    mandatoryPosition = emptyFieldsAfter;
-                    pieceToBeRemoved.add(justMovedTo);
-                    capturingMandatoryByOpponent = true;
-
-                    mandatoryPosition.forEach(p -> System.out.println(BLUE + "RULE:" + RESET + " " + opponentColor +
-                            " player Dame mandatory movement from " + BLUE + k + RESET + " to " + BLUE + p + RESET +
-                            " because capturing is mandatory"));
-
-//                    System.out.println(RED + getFieldsInBetween(k, justMovedTo) + RESET);
-//                    mandatoryPosition.clear();
-                }
-            });
+        if (opponentDames.isEmpty()) {
+            return false;
         }
 
-        canBeCapturedAfterMovementByPawn(justMovedTo);
+        List<Boolean> flags = new ArrayList<>();
+        opponentDames.forEach((k, v) -> {
+            boolean flag = continueCapturingAfterMovementByDame(justMovedTo, k, opponentColor);
+            flags.add(flag);
 
-//        Position positionLeftTop = new Position(justMovedTo.getY() + 1, justMovedTo.getX() - 1);
-//        Position positionRightTop = new Position(justMovedTo.getY() + 1, justMovedTo.getX() + 1);
-//        Position positionLeftBottom = new Position(justMovedTo.getY() - 1, justMovedTo.getX() - 1);
-//        Position positionRightBottom = new Position(justMovedTo.getY() - 1, justMovedTo.getX() + 1);
-////        int playerSide = players.get(justMovedTo).getColor();
-////
-////        if (players.containsKey(positionLeftTop) &&
-////                players.get(positionLeftTop).getColor() != playerSide &&
-////                positionRightBottom.isValid() &&
-////                !players.containsKey(positionRightBottom)
-////        )
-////        if (isCapturingAllowed(positionLeftTop, positionRightBottom, playerSide)) {
-////            System.out.println(BLUE + "RULE:" + RESET + " " + (playerSide == DARK_COLOR ? "Dark" : "Light") +
-////                    " player needs to move from " + BLUE + positionLeftTop + RESET +
-////                    " to " + BLUE + positionRightBottom + RESET + " because capturing is mandatory");
-//////            capturingMandatory = true;
-////            mandatoryPosition = positionRightBottom;
-////            pieceToBeRemoved = justMovedTo;
-////            return true;
-////        }
-//        ifCapturingMandatoryByOpponent(positionLeftTop, positionRightBottom, justMovedTo);
-//        ifCapturingMandatoryByOpponent(positionRightBottom, positionLeftTop, justMovedTo);
-//
-//        ifCapturingMandatoryByOpponent(positionRightTop, positionLeftBottom, justMovedTo);
-//        ifCapturingMandatoryByOpponent(positionLeftBottom, positionRightTop, justMovedTo);
+        });
+
+        return flags.stream().reduce((f1, f2) -> f1 || f2).orElse(false);
     }
+
+    private boolean continueCapturingAfterMovementByDame(Position justMovedTo, Position positionDame, String opponentColor) {
+        if (!arePositionsOnTheSameDiagonal(justMovedTo, positionDame) || !noOtherPiecesInBetween(justMovedTo, positionDame)) {
+            return false;
+        }
+        List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(positionDame, justMovedTo);
+        if (emptyFieldsAfter.isEmpty()) {
+            return false;
+        }
+
+        mandatoryPosition.addAll(emptyFieldsAfter);
+        pieceToBeRemoved.add(justMovedTo);
+        capturingMandatoryByOpponent = true;
+
+        mandatoryPosition.forEach(p -> System.out.println(BLUE + "RULE:" + RESET + " " + opponentColor +
+                " player Dame mandatory movement from " + BLUE + positionDame + RESET + " to " + BLUE + p + RESET +
+                " because capturing is mandatory"));
+
+        return true;
+    }
+    /////////////////////////
 
     private boolean arePositionsOnTheSameDiagonal(Position positionOne, Position positionTwo) {
         int oneX = positionOne.getX();
@@ -676,7 +594,7 @@ public class Board {
         }
 
         if (deltaX <= 1) {
-            System.out.println("INTERNAL MESSAGE: no empty fields in between (to be removed in production version)");
+            System.out.println(RED + "INTERNAL MESSAGE: no empty fields in between (to be removed in production version)" + RESET);
             return Collections.emptyList();
         }
 
@@ -694,14 +612,18 @@ public class Board {
     private List<Position> getEmptyFieldsAfterByPossibleCapturing(Position positionDame, Position justMovedTo) {
         List<Position> emptyFieldsAfter = getEmptyFieldsAfter(positionDame, justMovedTo);
         int opponentColor = players.get(justMovedTo).getColor();
-        List<Position> result = new ArrayList<>();
 
+        List<Position> result = new ArrayList<>();
         emptyFieldsAfter.forEach(p -> {
             if (canContinueCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
                 result.add(p);
                 System.out.println("Can continue capturing after dame movement: " + RED + p + RESET);
             }
         });
+
+        if (result.isEmpty()) {
+            return emptyFieldsAfter;
+        }
 
         return result;
     }
@@ -733,48 +655,12 @@ public class Board {
         return result;
     }
 
-    private void canBeCapturedAfterMovementByPawn(Position justMovedTo) {
-        Position positionLeftTop = new Position(justMovedTo.getY() + 1, justMovedTo.getX() - 1);
-        Position positionRightTop = new Position(justMovedTo.getY() + 1, justMovedTo.getX() + 1);
-        Position positionLeftBottom = new Position(justMovedTo.getY() - 1, justMovedTo.getX() - 1);
-        Position positionRightBottom = new Position(justMovedTo.getY() - 1, justMovedTo.getX() + 1);
-
-        ifCapturingMandatoryByOpponent(positionLeftTop, positionRightBottom, justMovedTo);
-        ifCapturingMandatoryByOpponent(positionRightBottom, positionLeftTop, justMovedTo);
-        ifCapturingMandatoryByOpponent(positionRightTop, positionLeftBottom, justMovedTo);
-        ifCapturingMandatoryByOpponent(positionLeftBottom, positionRightTop, justMovedTo);
-    }
-
-    private void ifCapturingMandatoryByOpponent(Position positionFrom, Position positionTo, Position justMovedTo) {
-        int playerColor = players.get(justMovedTo).getColor();
-
-        if (isCapturingAllowed(positionFrom, positionTo, playerColor)) {
-            // as the opponent is capturing then justMoveTo is to be captured and playerColor needs to be switch
-            System.out.println(BLUE + "RULE:" + RESET + " " + (playerColor == DARK ? "Light" : "Dark") +
-                    " player mandatory movement from " + BLUE + positionFrom + RESET +
-                    " to " + BLUE + positionTo + RESET + " because capturing is mandatory");
-            capturingMandatoryByOpponent = true;
-            mandatoryPosition.add(positionTo);
-            pieceToBeRemoved.add(justMovedTo);
-        }
-    }
-
-    private boolean isCapturingAllowed(Position from, Position to, int playerSide) {
-        return players.containsKey(from) &&
-                players.get(from).getColor() != playerSide &&
-                to.isValid() &&
-                !players.containsKey(to);
-    }
-
-///////////////////////////////////////// CAN CONTINUE CAPTURING AFTER MOVEMENT ////////////////////////////////////////////////////
-
+    // TODO: pawnOrDame is always dame ... veryfi / change it
     private boolean canContinueCapturingByDame(Position position, Position isGoingToBeRemoved, int pawnOrDame, int opponentColor) {
-
         if (isDameMoving(pawnOrDame)) {
             List<List<Position>> allDiagonals = getDiagonalsSplitByPosition(position);
 
             System.out.println(BLUE + position + RESET);
-//            allDiagonals.forEach(i -> System.out.println(RED + i + RESET));
 
             for (List<Position> partDiagonal : allDiagonals) {
                 System.out.println(RED + partDiagonal + RESET);
@@ -786,7 +672,7 @@ public class Board {
 
                         if (!partDiagonal.get(i).equals(isGoingToBeRemoved) &&
                                 players.containsKey(partDiagonal.get(i)) &&
-                                players.get(partDiagonal.get(i)).getColor() == opponentColor  &&
+                                players.get(partDiagonal.get(i)).getColor() == opponentColor &&
                                 !players.containsKey(partDiagonal.get(i + 1))) {
                             System.out.println(YELLOW + partDiagonal.get(i) + RESET);
                             return true;
@@ -842,7 +728,78 @@ public class Board {
 //        }
     }
 
-    private boolean canContinueCapturingByPawn (Position position) {
+    private List<List<Position>> getDiagonalsSplitByPosition(Position position) {
+        List<List<Position>> result = new ArrayList<>();
+
+        List<Position> result1 = getIterations(position, 1, 1);
+        List<Position> result2 = getIterations(position, -1, 1);
+        List<Position> result3 = getIterations(position, 1, -1);
+        List<Position> result4 = getIterations(position, -1, -1);
+
+        result.add(result1);
+        result.add(result2);
+        result.add(result3);
+        result.add(result4);
+
+        return result;
+    }
+
+    private List<Position> getIterations(Position position, int deltaX, int deltaY) {
+        int positionY = position.getY();
+        int positionX = position.getX();
+
+        List<Position> result = new ArrayList<>();
+        Position iteration = new Position(positionY + deltaY, positionX + deltaX);
+
+        while (iteration.isValid()) {
+            result.add(iteration);
+            iteration = new Position(iteration.getY() + deltaY, iteration.getX() + deltaX);
+        }
+
+        return result;
+    }
+
+
+    //////////////////////////// canBeCapturedAfterMovementByPawn ///////////////////////////////////////////////////////////////////
+
+
+    private void continueCapturingAfterMovementByPawns(Position justMovedTo) {
+        Position positionLeftTop = new Position(justMovedTo.getY() + 1, justMovedTo.getX() - 1);
+        Position positionRightTop = new Position(justMovedTo.getY() + 1, justMovedTo.getX() + 1);
+        Position positionLeftBottom = new Position(justMovedTo.getY() - 1, justMovedTo.getX() - 1);
+        Position positionRightBottom = new Position(justMovedTo.getY() - 1, justMovedTo.getX() + 1);
+
+        ifCapturingMandatoryByOpponent(positionLeftTop, positionRightBottom, justMovedTo);
+        ifCapturingMandatoryByOpponent(positionRightBottom, positionLeftTop, justMovedTo);
+        ifCapturingMandatoryByOpponent(positionRightTop, positionLeftBottom, justMovedTo);
+        ifCapturingMandatoryByOpponent(positionLeftBottom, positionRightTop, justMovedTo);
+    }
+
+    private void ifCapturingMandatoryByOpponent(Position positionFrom, Position positionTo, Position justMovedTo) {
+        int playerColor = players.get(justMovedTo).getColor();
+
+        if (isCapturingAllowed(positionFrom, positionTo, playerColor)) {
+            // as the opponent is capturing then justMoveTo is to be captured and playerColor needs to be switch
+            System.out.println(BLUE + "RULE:" + RESET + " " + (playerColor == DARK ? "Light" : "Dark") +
+                    " player mandatory movement from " + BLUE + positionFrom + RESET +
+                    " to " + BLUE + positionTo + RESET + " because capturing is mandatory");
+            capturingMandatoryByOpponent = true;
+            mandatoryPosition.add(positionTo);
+            pieceToBeRemoved.add(justMovedTo);
+        }
+    }
+
+    private boolean isCapturingAllowed(Position from, Position to, int playerSide) {
+        return players.containsKey(from) &&
+                players.get(from).getColor() != playerSide &&
+                to.isValid() &&
+                !players.containsKey(to);
+    }
+
+
+////////////////////////// PAWN - can CONTINUE capturing after movement ///////////////////////////////////////////////////////
+
+    private boolean canContinueCapturingByPawn(Position position) {
         Position positionLeftTop = new Position(position.getY() + 1, position.getX() - 1);
         Position positionLeftTopDiagonal = new Position(position.getY() + 2, position.getX() - 2);
 
@@ -885,43 +842,12 @@ public class Board {
         return flag1 || flag2 || flag3 || flag4;
     }
 
-    private List<List<Position>> getDiagonalsSplitByPosition(Position position) {
-        List<List<Position>> result = new ArrayList<>();
-
-        List<Position> result1 = getIterations(position, 1, 1);
-        List<Position> result2 = getIterations(position, -1, 1);
-        List<Position> result3 = getIterations(position, 1, -1);
-        List<Position> result4 = getIterations(position, -1, -1);
-
-        result.add(result1);
-        result.add(result2);
-        result.add(result3);
-        result.add(result4);
-
-        return result;
-    }
-
-    private List<Position> getIterations(Position position, int deltaX, int deltaY) {
-        int positionY = position.getY();
-        int positionX = position.getX();
-
-        List<Position> result = new ArrayList<>();
-        Position iteration = new Position(positionY + deltaY, positionX + deltaX);
-
-        while (iteration.isValid()) {
-            result.add(iteration);
-            iteration = new Position(iteration.getY() + deltaY, iteration.getX() + deltaX);
-        }
-
-        return result;
-    }
-
     private boolean ifContinuingCapturingMandatory(Position toBeCaptured, Position positionAfterCapturing, Position justMovedTo) {
         int playerSide = players.get(justMovedTo).getColor();
         if (isCapturingAllowed(toBeCaptured, positionAfterCapturing, playerSide)) {
             System.out.println(BLUE + "RULE:" + RESET + " " + (playerSide == DARK ? "Dark" : "Light") +
-                    " player is required to continue capturing... from " + BLUE + justMovedTo + RESET +
-                    " to " + BLUE + positionAfterCapturing + RESET);
+                    " player's " + BLUE + "pawn" + RESET + " is required to continue capturing... from " +
+                    BLUE + justMovedTo + RESET + " to " + BLUE + positionAfterCapturing + RESET);
 
             mandatoryPosition.add(positionAfterCapturing);
             pieceToBeRemoved.add(toBeCaptured);
