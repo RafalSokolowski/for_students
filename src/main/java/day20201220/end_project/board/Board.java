@@ -5,6 +5,7 @@ import day20201220.end_project.figure.Empty;
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
 import day20201220.end_project.figure.SixFigures;
+import javafx.geometry.Pos;
 import lombok.Getter;
 
 import java.util.*;
@@ -192,7 +193,17 @@ public class Board {
                 return false;
             } else {
                 capturingMandatoryByOpponent = false;
-                Position pieceToBeRemovedByIndexOfPositionToInMandatoryPositions = pieceToBeRemoved.get(mandatoryPosition.indexOf(positionTo));
+
+//                int indexToBeRemoved;
+//                if(pieceToBeRemoved.size() == 1){
+//                    indexToBeRemoved = 0;
+//                } else {
+//                    indexToBeRemoved = mandatoryPosition.indexOf(positionTo);
+//                }
+
+                int indexToBeRemoved = pieceToBeRemoved.size() == 1 ? 0 : mandatoryPosition.indexOf(positionTo);
+                Position pieceToBeRemovedByIndexOfPositionToInMandatoryPositions = pieceToBeRemoved.get(indexToBeRemoved);
+
                 players.get(pieceToBeRemovedByIndexOfPositionToInMandatoryPositions).setState(0);
                 players.remove(pieceToBeRemovedByIndexOfPositionToInMandatoryPositions);
 
@@ -201,16 +212,16 @@ public class Board {
 
                 updatePlayersMapAndStatus(positionFrom, positionTo);
 
-//                continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
+                continueCapturingIfPossible = canContinueCapturing(positionTo, players.get(positionTo).getFigure());
 
                 /////////////////
-                int pawnOrDame = players.get(positionTo).getFigure();
-                int playerColor = players.get(positionTo).getColor();
-                if (isDameMoving(pawnOrDame)) {
-                    continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
-                } else {
-                    continueCapturingIfPossible = canContinueCapturingByPawn(positionTo);
-                }
+//                int pawnOrDame = players.get(positionTo).getFigure();
+//                int playerColor = players.get(positionTo).getColor();
+//                if (isDameMoving(pawnOrDame)) {
+//                    continueCapturingIfPossible = canContinueCapturing(positionTo);
+//                } else {
+//                    continueCapturingIfPossible = canContinueCapturing(positionTo);
+//                }
                 /////////////////
 
                 if (continueCapturingIfPossible) {
@@ -234,7 +245,7 @@ public class Board {
         continueCapturingIfPossible = false;
 
         OneFigure piece = players.get(positionTo);
-        if (shouldWeChangePieceToDame(piece.getColor(), piece.getPosition().getY())) {
+        if (shouldWeChangePieceToDame(piece)) {
             String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
             System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
                     " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
@@ -615,7 +626,7 @@ public class Board {
 
         List<Position> result = new ArrayList<>();
         emptyFieldsAfter.forEach(p -> {
-            if (canContinueCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
+            if (canCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
                 result.add(p);
                 System.out.println("Can continue capturing after dame movement: " + RED + p + RESET);
             }
@@ -656,7 +667,7 @@ public class Board {
     }
 
     // TODO: pawnOrDame is always dame ... veryfi / change it
-    private boolean canContinueCapturingByDame(Position position, Position isGoingToBeRemoved, int pawnOrDame, int opponentColor) {
+    private boolean canCapturingByDame(Position position, Position isGoingToBeRemoved, int pawnOrDame, int opponentColor) {
         if (isDameMoving(pawnOrDame)) {
             List<List<Position>> allDiagonals = getDiagonalsSplitByPosition(position);
 
@@ -797,9 +808,65 @@ public class Board {
     }
 
 
-////////////////////////// PAWN - can CONTINUE capturing after movement ///////////////////////////////////////////////////////
+////////////////////////// DAME & PAWN - can CONTINUE capturing after movement ///////////////////////////////////////////////////////
+
+    private boolean canContinueCapturing(Position position, int pawnOrDame) {
+
+        return pawnOrDame == DAME ?
+                canContinueCapturingByDame(position) :
+                canContinueCapturingByPawn(position);
+
+//        boolean flagPawn = canContinueCapturingByPawn(position);
+//
+//        boolean flagDame = canContinueCapturingByDame(position);
+////        boolean flagDame = false;
+//
+//        return flagPawn || flagDame;
+//        Position positionLeftTop = new Position(position.getY() + 1, position.getX() - 1);
+//        Position positionLeftTopDiagonal = new Position(position.getY() + 2, position.getX() - 2);
+//
+//        Position positionRightTop = new Position(position.getY() + 1, position.getX() + 1);
+//        Position positionRightTopDiagonal = new Position(position.getY() + 2, position.getX() + 2);
+//
+//        Position positionLeftBottom = new Position(position.getY() - 1, position.getX() - 1);
+//        Position positionLeftBottomDiagonal = new Position(position.getY() - 2, position.getX() - 2);
+//
+//        Position positionRightBottom = new Position(position.getY() - 1, position.getX() + 1);
+//        Position positionRightBottomDiagonal = new Position(position.getY() - 2, position.getX() + 2);
+//
+////        int playerSide = players.get(justMovedTo).getColor();
+////
+////        if (players.containsKey(positionLeftTop) &&
+////                players.get(positionLeftTop).getColor() != playerSide &&
+////                positionRightBottom.isValid() &&
+////                !players.containsKey(positionRightBottom)
+////        )
+////        if (isCapturingAllowed(positionLeftTop, positionRightBottom, playerSide)) {
+////            System.out.println(BLUE + "RULE:" + RESET + " " + (playerSide == DARK_COLOR ? "Dark" : "Light") +
+////                    " player needs to move from " + BLUE + positionLeftTop + RESET +
+////                    " to " + BLUE + positionRightBottom + RESET + " because capturing is mandatory");
+//////            capturingMandatory = true;
+////            mandatoryPosition = positionRightBottom;
+////            pieceToBeRemoved = justMovedTo;
+////            return true;
+////        }
+//        boolean flag1 = ifContinuingCapturingMandatory(positionLeftTop, positionLeftTopDiagonal, position);
+//        boolean flag2 = ifContinuingCapturingMandatory(positionRightBottom, positionRightBottomDiagonal, position);
+//
+//        boolean flag3 = ifContinuingCapturingMandatory(positionRightTop, positionRightTopDiagonal, position);
+//        boolean flag4 = ifContinuingCapturingMandatory(positionLeftBottom, positionLeftBottomDiagonal, position);
+//
+////            if (flag1 || flag2 || flag3 || flag4) {
+////                System.out.println(RED + flag1 + ", " + flag2 + ", " + flag3 + ", " + flag4 + ", " + RESET);
+////                return true;
+////            }
+////            return false;
+//        return flag1 || flag2 || flag3 || flag4;
+    }
 
     private boolean canContinueCapturingByPawn(Position position) {
+        System.out.println(YELLOW+"canContinueCapturingByPawn"+RESET);
+
         Position positionLeftTop = new Position(position.getY() + 1, position.getX() - 1);
         Position positionLeftTopDiagonal = new Position(position.getY() + 2, position.getX() - 2);
 
@@ -856,11 +923,60 @@ public class Board {
         return false;
     }
 
+    private boolean canContinueCapturingByDame(Position position) {
+        System.out.println(YELLOW+"canContinueCapturingByDame"+RESET);
+
+        List<List<Position>> diagonalsSplitByDamePosition = getDiagonalsSplitByPosition(position);
+        int dameColor = players.get(position).getColor();
+
+        for (List<Position> oneDiagonalSplit : diagonalsSplitByDamePosition) {
+            List<Position> opponentPieces = getOpponentPiece(oneDiagonalSplit, dameColor);
+            if (!opponentPieces.isEmpty()) {
+                for (Position p : opponentPieces) {
+                    List<Position> emptyFieldsAfter = getEmptyFieldsAfter(position, p);
+                    if (!emptyFieldsAfter.isEmpty()) {
+                        mandatoryPosition.addAll(emptyFieldsAfter);
+                        System.out.println(BLUE + "RULE:" + RESET + " " + (dameColor == DARK ? "Dark" : "Light") +
+                                " player's " + BLUE + "dame" + RESET + " is required to continue capturing... from " +
+                                BLUE + position + RESET + " to " + BLUE + emptyFieldsAfter + RESET);
+                        pieceToBeRemoved.add(p);
+                    }
+                }
+            }
+        }
+
+        ////////////////////////////// : /
+
+        return !mandatoryPosition.isEmpty();
+    }
+
+    private List<Position> getOpponentPiece(List<Position> oneDiagonalSplit, int dameColor) {
+        List<Position> result = new ArrayList<>();
+
+        oneDiagonalSplit.forEach(p -> {
+            if (players.containsKey(p) && players.get(p).getColor() != dameColor) {
+                result.add(p);
+            }
+        });
+
+        return result;
+    }
+
+//    private boolean isEmptyFieldAfter ()
+
 ///////////////////////////////////////////// CHANGE PIECE TO DAME ///////////////////////////////////////////////////////////
 
-    private boolean shouldWeChangePieceToDame(int pieceColor, int pieceAxisY) {
-        if (pieceColor == DARK && pieceAxisY == 7) return true;
-        if (pieceColor == LIGHT && pieceAxisY == 0) return true;
+//    private boolean shouldWeChangePieceToDame(int pieceColor, int pieceAxisY) {
+//
+//        if (pieceColor == DARK && pieceAxisY == 7) return true;
+//        if (pieceColor == LIGHT && pieceAxisY == 0) return true;
+//        return false;
+//    }
+
+    private boolean shouldWeChangePieceToDame(OneFigure piece) {
+        if (piece.getFigure() == DAME) return false;
+        if (piece.getColor() == DARK && piece.getPosition().getY() == 7) return true;
+        if (piece.getColor() == LIGHT && piece.getPosition().getY() == 0) return true;
         return false;
     }
 

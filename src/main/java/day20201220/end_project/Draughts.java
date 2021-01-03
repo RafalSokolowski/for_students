@@ -88,11 +88,11 @@ public class Draughts {
         board.movePieceByString("D7","C6");
         board.printBoard();
 
-        System.out.println("\n7. Phase");
+        System.out.println("\n7. Phase D5 -> E6");
         board.movePieceByString("D5","E6");
         board.printBoard();
 
-        System.out.println("\n8. Phase");
+        System.out.println("\n8. Phase F5 -> D7");
         board.movePieceByString("F5","D7");
         board.printBoard();
 
@@ -233,8 +233,16 @@ public class Draughts {
         board.movePieceByString("B7","F3");
         board.printBoard();
 
-        System.out.println("\n38. Phase ");
+        System.out.println("\n38. Phase ");  // TODO: zablokować zbijanie spowrotem po tej samej diagonali ???
         board.movePieceByString("F3","D1");
+        board.printBoard();
+
+        System.out.println("\n39_diff. Phase ");  /// zmiana koncepcji , patrz TO-DO powyżej
+        board.movePieceByString("D1","H5");
+        board.printBoard();
+
+        System.out.println("\n39_diff. Phase ");  /// zmiana koncepcji , patrz TO-DO powyżej
+        board.movePieceByString("H5","D1");
         board.printBoard();
 
         System.out.println("\n39. Phase ");
@@ -249,29 +257,101 @@ public class Draughts {
         board.movePieceByString("A6","B5");
         board.printBoard();
 
-        System.out.println("\n42. Phase ");
-        board.movePieceByString("E6","F5");
-        board.printBoard();
-
-        System.out.println("\n43. Phase ");
-        board.movePieceByString("B7","F3");
+        System.out.println("\n43. Phase "); // nowy kierunek try
+        board.movePieceByString("D1","B3");
         board.printBoard();
 
         System.out.println("\n44. Phase ");
-        board.movePieceByString("G4","E6");
+        board.movePieceByString("G2","H3");
         board.printBoard();
 
         System.out.println("\n45. Phase ");
-        board.movePieceByString("E6","C8");
+        board.movePieceByString("H1","G2");
         board.printBoard();
 
         System.out.println("\n46. Phase ");
+        board.movePieceByString("G2","F3");
+        board.printBoard();
+
+        System.out.println("\n47. Phase ");
+        board.movePieceByString("F3","G4");
+        board.printBoard();
+
+        System.out.println("\n48. Phase ");
+        board.movePieceByString("E6","F5");
+        board.printBoard();
+
+        System.out.println("\n49. Phase ");
+        board.movePieceByString("G4","E6");
+        board.printBoard();
+
+        System.out.println("\n50. Phase ");
+        board.movePieceByString("E6","C8");
+        board.printBoard();
+
+        System.out.println("\n51. Phase ");
         board.movePieceByString("C8","A6");
         board.printBoard();
 
-        System.out.println("\n47. Phase - A6 -> F1");
-        board.movePieceByString("A6","F1");
+        System.out.println("\n52. Phase ");
+        board.movePieceByString("A6","C4");
         board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("C4","A2");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("E8","F7");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("A2","B1");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("A8","B7");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("B7","C6");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("C6","D5");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("D5","C4");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("B1","A2");
+        board.printBoard();
+
+        System.out.println("\n53. Phase ");
+        board.movePieceByString("F7","E6");
+        board.printBoard();
+
+//        System.out.println("\n43. Phase ");
+//        board.movePieceByString("B7","F3");
+//        board.printBoard();
+//
+//        System.out.println("\n44. Phase ");
+//        board.movePieceByString("G4","E6");
+//        board.printBoard();
+//
+//        System.out.println("\n45. Phase ");
+//        board.movePieceByString("E6","C8");
+//        board.printBoard();
+//
+//        System.out.println("\n46. Phase ");
+//        board.movePieceByString("C8","A6");
+//        board.printBoard();
+//
+//        System.out.println("\n47. Phase - A6 -> F1");
+//        board.movePieceByString("A6","F1");
+//        board.printBoard();
 //        System.out.println(playerBlack.getFirstSix());
 //        board.placeFiguresFromLong(playerBlack.getFirstSix());
 //
