@@ -16,8 +16,8 @@ public class OneFigure implements OnTheBoard, Comparable<OneFigure> {
 
     // TODO: rozważyć zmianę na byte z int ?
     private int state;          // 0-eliminated, 1-in the game
-    private int figure;         // 0-pawn, 1-queen
-    private int color;          // 0-black, 1-white
+    private int figure;         // 0-pawn, 1-dame
+    private int color;          // 0-dark, 1-light
     private Position position;  // (y,x)
 //    private int y;         // y position
 //    private int x;         // x position
