@@ -31,4 +31,7 @@ public class Const {
     public static final char G = '\u0047';
     public static final char H = '\u0048';
 
+    public static final String EMPTY_MESSAGE = "";
+    public static final int INVALID_COORDINATE = -1;
+
 }

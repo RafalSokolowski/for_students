@@ -5,7 +5,6 @@ import day20201220.end_project.figure.Empty;
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
 import day20201220.end_project.figure.SixFigures;
-import javafx.geometry.Pos;
 import lombok.Getter;
 
 import java.util.*;
@@ -21,13 +20,15 @@ public class Board {
     private Map<Position, OnTheBoard> board;
     private Map<Position, OneFigure> players;
 
-    boolean capturingMandatoryByOpponent;
-    boolean continueCapturingIfPossible;
-    List<Position> mandatoryPositions;
-    List<Position> piecesToBeRemoved;
+    private boolean capturingMandatoryByOpponent;
+    private boolean continueCapturingIfPossible;
+    private List<Position> mandatoryPositions;
+    private List<Position> piecesToBeRemoved;
 
-    Map<Position, List<Position>> new_toBeRemovedByMandatoryPositions;
-    int darkOrLight;
+    //    private Map<Position, List<Position>> toBeRemoved_MandatoryPositions;
+    private Map<Position, Map<Position, List<Position>>> positionsFrom_ToBeRemoved_MandatoryPositionsTo;
+    private int darkOrLight;
+    private boolean hasJsutCaptured;
 
     public Board() {
         this.board = new HashMap<>(8 * 8);
@@ -38,8 +39,10 @@ public class Board {
         this.mandatoryPositions = new ArrayList<>();
         this.piecesToBeRemoved = new ArrayList<>();
 
-        this.new_toBeRemovedByMandatoryPositions = new HashMap<>();
+//        this.toBeRemoved_MandatoryPositions = new HashMap<>();
+        this.positionsFrom_ToBeRemoved_MandatoryPositionsTo = new HashMap<>();
         darkOrLight = 1;
+        this.hasJsutCaptured = false;
     }
 
     ////////////////////////////////////////////// INITIALIZATION ////////////////////////////////////////////////////////////
@@ -178,59 +181,103 @@ public class Board {
 
     }
 
-    public boolean lightAndDarkSequenceMovement() {
-
-        return true;
-    }
-
-    //////////////////////  MOVEMENT - try new approach //////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////  MOVEMENT - try new approach with listener //////////////////////////////////////////////////////////////////////////////////////////////
 
     public boolean movePieceByString(String stringFrom, String stringTo) {
-
 
         Position positionFrom = getPositionFromString(stringFrom);
         Position positionTo = getPositionFromString(stringTo);
 
-        if (!new_toBeRemovedByMandatoryPositions.isEmpty()) {
-            for (Map.Entry<Position, List<Position>> entry : new_toBeRemovedByMandatoryPositions.entrySet()) {
-                if (!entry.getValue().contains(positionTo)) {
-                    System.out.println(RED + "ERROR:" + RESET + " This move" + RED + " was not proceed" + RESET +
-                            " because capturing / continue capturing is mandatory... try again according to the " +
-                            BLUE + "RULE" + RESET + " mentioned above");
-                    return false;
-                }
+
+        // Check whether there are any mandatory movements
+        if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
+
+            if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(positionFrom)) {
+                System.out.println(RED + "ERROR:" + RESET + " This move was not proceed" + RED +
+                        " (incorrect position from - " + positionFrom + ")" + RESET +
+                        " because capturing / continue capturing is mandatory... try again according to the " +
+                        BLUE + "RULE" + RESET + " mentioned above");
+                return false;
             }
+
+            List<Position> allMandatoryPositions = positionsFrom_ToBeRemoved_MandatoryPositionsTo
+                    .get(positionFrom).values()
+                    .stream().flatMap(Collection::stream)
+                    .collect(Collectors.toList());
+
+//            System.out.println();
+//            System.out.println("1.                 PositionFrom: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.keySet());
+//            System.out.println("2.          Map by positionFrom: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom));
+//            System.out.println("3.        Positions toBeRemoved: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom).keySet());
+//            System.out.println("4. Possible mandatory movements: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom).values());
+//            System.out.println("5.   Mandatory positions merged: " + allMandatoryPositions);
+//            System.out.println("\n");
+
+            if (!allMandatoryPositions.contains(positionTo)) {
+                System.out.println(RED + "ERROR:" + RESET + " This move was not proceed" + RED +
+                        " (incorrect position to - " + positionTo + ")" + RESET +
+                        " because capturing / continue capturing is mandatory... try again according to the " +
+                        BLUE + "RULE" + RESET + " mentioned above");
+                return false;
+            }
+
+            positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom).forEach((k, v) -> {
+                if (v.contains(positionTo)) {
+                    players.get(k).setState(ELIMINATED);
+                    players.remove(k);
+                    positionsFrom_ToBeRemoved_MandatoryPositionsTo.clear();
+                    hasJsutCaptured = true;
+                }
+
+            });
 
         } else {
 
+            // 1. is movement valid
             if (isMovementConditionsNotCorrect(stringFrom, stringTo)) {
                 return false;
             }
 
-            OneFigure piece = players.get(positionFrom);
-
-            if (piece.getColor() != darkOrLight) {
-                System.out.println(BLUE + "RULE:" + RESET + " movement needs to be altering... it is not" +
-                        (piece.getColor() == 0 ? "Dark" : "light") + " turn (" + RED +
-                        "movement was not proceeded, try again" + RESET + ")");
-                return false;
-            }
-
-            updatePlayersMapAndStatus(positionFrom, positionTo);
-
-            if (shouldWeChangePieceToDame(piece)) {
-                String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
-                System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
-                        " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
-                        "... congratulation " + playersColor + " player");
-                changePawnToDame(piece);
-            }
-
         }
 
+        // 2. change light to dark (back and forth)
+        OneFigure piece = players.get(positionFrom);
+        if (piece.getColor() != darkOrLight) {
+            System.out.println(BLUE + "RULE:" + RESET + " movement needs to be altering... it is not " +
+                    BLUE + (piece.getColor() == 0 ? "Dark" : "light") + RESET + " turn (" + RED +
+                    "movement was not proceeded, try again" + RESET + ")");
+            return false;
+        }
+
+        // 3. update piece move from to
+        updateMovedPiece(positionFrom, positionTo);
+
+        // 4. change pawn to dame if needed
+        if (shouldWeChangePieceToDame(piece)) {
+            String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
+            System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
+                    " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
+                    "... congratulation " + playersColor + " player");
+            changePawnToDame(piece);
+        }
+
+        // 5. change next player color
+        darkOrLight = changeDarkLightTurn(darkOrLight);
+
+        // 6. is there anything-to-capture listener
         capturingListener(darkOrLight);
 
-        darkOrLight = changeDarkLightTurn(darkOrLight);
+        // 7. print RULE if any
+        positionsFrom_ToBeRemoved_MandatoryPositionsTo.forEach((k, v) -> {
+            System.out.print(BLUE + "RULE:" + RESET + " " + (darkOrLight == DARK ? "Dark" : "Light") + " player's " +
+                    (players.get(positionTo).getFigure() == PAWN ? "pawn" : "dame") + " mandatory movement from " +
+                    BLUE + k + RESET + " to ");
+            AtomicInteger counter = new AtomicInteger(1);
+            v.forEach((keyV, valueV) -> {
+                System.out.print("(" + counter.getAndIncrement() + ") " + BLUE + valueV + RESET + " and opponent " + BLUE + keyV + RESET + " will be captured, ");
+            });
+            System.out.println();
+        });
 
         return true;
     }
@@ -278,7 +325,7 @@ public class Board {
                 mandatoryPositions.clear();
                 piecesToBeRemoved.clear();
 
-                updatePlayersMapAndStatus(positionFrom, positionTo);
+                updateMovedPiece(positionFrom, positionTo);
 
                 continueCapturingIfPossible = canContinueCapturing(positionTo, players.get(positionTo).getFigure());
 
@@ -304,7 +351,7 @@ public class Board {
                 return false;
             }
 
-            updatePlayersMapAndStatus(positionFrom, positionTo);
+            updateMovedPiece(positionFrom, positionTo);
 
         }
         if (!continueCapturingIfPossible) {
@@ -1055,7 +1102,7 @@ public class Board {
     }
 
 
-//////////////////////////////////////// CAPTURING LISTENER///////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// CAPTURING LISTENER ///////////////////////////////////////////////////////////////////////
 
     private void capturingListener(int darkOrLight) {
         players.forEach((k, v) -> {
@@ -1107,20 +1154,36 @@ public class Board {
         for (Position positionToBeRemoved : opponentsNextToBeListen) {
             positionAfter = getFieldAfter(positionToBeListen, positionToBeRemoved);
             if (positionAfter.isValid() && !players.containsKey(positionAfter)) {
-                new_toBeRemovedByMandatoryPositions.put(positionToBeRemoved, Arrays.asList(positionAfter));
+                Position finalPositionAfter = positionAfter;
+                // TODO: start - do oddzielnej metody
+                if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(positionToBeListen)) {
+                    positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(
+                            positionToBeListen,
+                            new HashMap<>() {{
+                                put(positionToBeRemoved, Arrays.asList(finalPositionAfter));
+                            }}
+                    );
+                } else {
+                    positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionToBeListen)
+                            .put(positionToBeRemoved, Arrays.asList(positionAfter));
+                }
+                // TODO: end - do oddzilenje metody
             }
+
         }
-
-        if (new_toBeRemovedByMandatoryPositions.isEmpty()) {
-            return;
-        }
-
-        new_toBeRemovedByMandatoryPositions.forEach((k, v) -> {
-            System.out.println(BLUE + "RULE:" + RESET + " mandatory movement from " + BLUE + positionToBeListen + RESET +
-                    " to " + BLUE + v + RESET + " and opponent " + BLUE + k + RESET + " will be captured\n"
-                    + YELLOW + new_toBeRemovedByMandatoryPositions + RESET);
-        });
-
+//        if (positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
+//            return;
+//        }
+//
+//        positionsFrom_ToBeRemoved_MandatoryPositionsTo.forEach((k, v) ->
+//        {
+//            System.out.print(BLUE + "RULE:" + RESET + " mandatory movement from " + BLUE + k + RESET + " to ");
+//            AtomicInteger counter = new AtomicInteger(1);
+//            v.forEach((keyV, valueV) -> {
+//                System.out.print("(" + counter.getAndIncrement() + ") " + BLUE + valueV + RESET + " and opponent " + BLUE + keyV + RESET + " will be captured, ");
+//            });
+//            System.out.println();
+//        });
     }
 
     private Position getFieldAfter(Position positionToBeListen, Position positionOpponent) {
@@ -1153,10 +1216,10 @@ public class Board {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void updatePlayersMapAndStatus(Position positionFrom, Position positionTo) {
-        players.get(positionFrom).setPosition(positionTo);
-        players.put(positionTo, players.get(positionFrom));
-        players.remove(positionFrom);
+    private void updateMovedPiece(Position positionFrom, Position positionTo) {
+        players.get(positionFrom).setPosition(positionTo);      // change of position - new (y,x) coordinates
+        players.put(positionTo, players.get(positionFrom));     // change in players database
+        players.remove(positionFrom);                           // remove OneFigure with old position
     }
 
 }
