@@ -120,6 +120,21 @@ public class Draughts {
         board.movePieceByString("C4", "E6");
         board.printBoard();
 
+        System.out.println("\n8. Phase  -  E6 -> G8");
+        board.movePieceByString("E6", "G8");
+        board.printBoard();
+
+        System.out.println("\n8. Phase  -  D7 -> E6");
+        board.movePieceByString("D7", "E6");
+        board.printBoard();
+
+        System.out.println("\n9. Phase - intentional mistake as capturing by dame is mandatory -  G8 -> F7");
+        board.movePieceByString("G8", "F7");
+        board.printBoard();
+
+        System.out.println("\n9. Phase  -  G8 -> C4");
+        board.movePieceByString("G8", "C4");
+        board.printBoard();
 
 //        System.out.println("\n6. Phase - intentional mistake - light D5 -> E4");
 //        board.movePieceByString("D5", "E4");

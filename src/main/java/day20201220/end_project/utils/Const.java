@@ -22,6 +22,9 @@ public class Const {
     public static final int ELIMINATED = 0;
     public static final int PLAYING = 1;
 
+    public static final int LAST_COORDINATE = 7;
+    public static final int FIRST_COORDINATE = 0;
+
     public static final char A = '\u0041';
     public static final char B = '\u0042';
     public static final char C = '\u0043';

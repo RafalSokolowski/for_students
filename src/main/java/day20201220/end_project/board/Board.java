@@ -28,7 +28,7 @@ public class Board {
     //    private Map<Position, List<Position>> toBeRemoved_MandatoryPositions;
     private Map<Position, Map<Position, List<Position>>> positionsFrom_ToBeRemoved_MandatoryPositionsTo;
     private int darkOrLight;
-    private boolean hasJsutCaptured;
+    private boolean hasCapturedInPreviosuRound;
 
     public Board() {
         this.board = new HashMap<>(8 * 8);
@@ -42,7 +42,7 @@ public class Board {
 //        this.toBeRemoved_MandatoryPositions = new HashMap<>();
         this.positionsFrom_ToBeRemoved_MandatoryPositionsTo = new HashMap<>();
         darkOrLight = 1;
-        this.hasJsutCaptured = false;
+        this.hasCapturedInPreviosuRound = false;
     }
 
     ////////////////////////////////////////////// INITIALIZATION ////////////////////////////////////////////////////////////
@@ -190,7 +190,9 @@ public class Board {
 
 
         // Check whether there are any mandatory movements
+//        while (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty() || hasJustCaptured) {
         if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
+
 
             if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(positionFrom)) {
                 System.out.println(RED + "ERROR:" + RESET + " This move was not proceed" + RED +
@@ -226,18 +228,29 @@ public class Board {
                     players.get(k).setState(ELIMINATED);
                     players.remove(k);
                     positionsFrom_ToBeRemoved_MandatoryPositionsTo.clear();
-                    hasJsutCaptured = true;
+                    hasCapturedInPreviosuRound = true;
                 }
-
             });
 
-        } else {
 
+//            // 3. update piece move from to
+//            updateMovedPiece(positionFrom, positionTo);
+//
+//            // 4. change pawn to dame if needed
+//            if (shouldWeChangePieceToDame(players.get(positionTo))) {
+//                String playersColor = players.get(positionFrom).getColor() == DARK ? "Dark" : "Light";
+//                System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
+//                        " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
+//                        "... congratulation " + playersColor + " player");
+//                changePawnToDame(players.get(positionFrom));
+//            }
+
+
+        } else {
             // 1. is movement valid
             if (isMovementConditionsNotCorrect(stringFrom, stringTo)) {
                 return false;
             }
-
         }
 
         // 2. change light to dark (back and forth)
@@ -252,20 +265,39 @@ public class Board {
         // 3. update piece move from to
         updateMovedPiece(positionFrom, positionTo);
 
-        // 4. change pawn to dame if needed
-        if (shouldWeChangePieceToDame(piece)) {
-            String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
-            System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
-                    " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
-                    "... congratulation " + playersColor + " player");
-            changePawnToDame(piece);
+
+        if (hasCapturedInPreviosuRound) {
+            singlePieceCapturingListener(players.get(positionTo));
+            if (positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
+                // 4. change pawn to dame if needed
+                if (shouldWeChangePieceToDame(piece)) {
+                    String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
+                    System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
+                            " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
+                            "... congratulation " + playersColor + " player");
+                    changePawnToDame(piece);
+                }
+                // 5. change next player color
+                darkOrLight = changeDarkLightTurn(darkOrLight);
+                // 6. is there anything-to-capture listener
+                capturingListener(darkOrLight);
+            }
+            hasCapturedInPreviosuRound = false;
+        } else {
+            // 4. change pawn to dame if needed
+            if (shouldWeChangePieceToDame(piece)) {
+                String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
+                System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
+                        " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
+                        "... congratulation " + playersColor + " player");
+                changePawnToDame(piece);
+            }
+            // 5. change next player color
+            darkOrLight = changeDarkLightTurn(darkOrLight);
+            // 6. is there anything-to-capture listener
+            capturingListener(darkOrLight);
         }
 
-        // 5. change next player color
-        darkOrLight = changeDarkLightTurn(darkOrLight);
-
-        // 6. is there anything-to-capture listener
-        capturingListener(darkOrLight);
 
         // 7. print RULE if any
         positionsFrom_ToBeRemoved_MandatoryPositionsTo.forEach((k, v) -> {
@@ -697,89 +729,6 @@ public class Board {
         return false;
     }
 
-    private boolean noOtherPiecesInBetween(Position positionOne, Position positionTwo) {
-        List<Position> piecesInBetween = getFieldsInBetween(positionOne, positionTwo);
-        for (Position p : piecesInBetween) {
-            if (players.containsKey(p)) return false;
-        }
-        return true;
-    }
-
-    private List<Position> getFieldsInBetween(Position positionOne, Position positionTwo) {
-        int oneX = positionOne.getX();
-        int oneY = positionOne.getY();
-        int twoX = positionTwo.getX();
-        int twoY = positionTwo.getY();
-
-        int deltaX = Math.abs(oneX - twoX);
-        int deltaY = Math.abs(oneY - twoY);
-
-        if (deltaX != deltaY) {
-            System.out.println(RED + "INTERNAL MESSAGE: problem with diagonal distance in getFieldsInBetween (to be removed in production version)" + RESET);
-            return Collections.emptyList();
-        }
-
-        if (deltaX <= 1) {
-            System.out.println(RED + "INTERNAL MESSAGE: no empty fields in between (to be removed in production version)" + RESET);
-            return Collections.emptyList();
-        }
-
-        List<Position> result = new ArrayList<>(deltaX - 1);
-        while (deltaX-- > 1) {
-            result.add(new Position(
-                    oneY > twoY ? oneY - deltaX : oneY + deltaX,
-                    oneX > twoX ? oneX - deltaX : oneX + deltaX
-            ));
-        }
-
-        return result;
-    }
-
-    private List<Position> getEmptyFieldsAfterByPossibleCapturing(Position positionDame, Position justMovedTo) {
-        List<Position> emptyFieldsAfter = getEmptyFieldsAfter(positionDame, justMovedTo);
-        int opponentColor = players.get(justMovedTo).getColor();
-
-        List<Position> result = new ArrayList<>();
-        emptyFieldsAfter.forEach(p -> {
-            if (canCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
-                result.add(p);
-                System.out.println("Can continue capturing after dame movement: " + RED + p + RESET);
-            }
-        });
-
-        if (result.isEmpty()) {
-            return emptyFieldsAfter;
-        }
-
-        return result;
-    }
-
-    private List<Position> getEmptyFieldsAfter(Position positionDame, Position justMovedTo) {
-//        if (positionAfter.isEmpty()) {
-//            System.out.println(RED + "INTERNAL MESSAGE: problem with getEmptyFieldsAfter, should not be empty (to be removed in production version)" + RESET);
-//            return Collections.emptyList();
-//        }
-        int justMovedToX = justMovedTo.getX();
-        int justMovedToY = justMovedTo.getY();
-        int positionDameX = positionDame.getX();
-        int positionDameY = positionDame.getY();
-
-        int deltaX = justMovedToX > positionDameX ? 1 : -1;
-        int deltaY = justMovedToY > positionDameY ? 1 : -1;
-
-        List<Position> result = new ArrayList<>();
-        Position positionAfter = new Position(justMovedToY + deltaY, justMovedToX + deltaX);
-
-        while (!players.containsKey(positionAfter) && positionAfter.isValid()) {
-            result.add(positionAfter);
-            positionAfter = new Position(
-                    positionAfter.getY() + deltaY,
-                    positionAfter.getX() + deltaX
-            );
-        }
-
-        return result;
-    }
 
     // TODO: pawnOrDame is always dame ... veryfi / change it
     private boolean canCapturingByDame(Position position, Position isGoingToBeRemoved, int pawnOrDame, int opponentColor) {
@@ -852,37 +801,6 @@ public class Board {
 //            return flag1 || flag2 || flag3 || flag4;
 //
 //        }
-    }
-
-    private List<List<Position>> getDiagonalsSplitByPosition(Position position) {
-        List<List<Position>> result = new ArrayList<>();
-
-        List<Position> result1 = getIterations(position, 1, 1);
-        List<Position> result2 = getIterations(position, -1, 1);
-        List<Position> result3 = getIterations(position, 1, -1);
-        List<Position> result4 = getIterations(position, -1, -1);
-
-        result.add(result1);
-        result.add(result2);
-        result.add(result3);
-        result.add(result4);
-
-        return result;
-    }
-
-    private List<Position> getIterations(Position position, int deltaX, int deltaY) {
-        int positionY = position.getY();
-        int positionX = position.getX();
-
-        List<Position> result = new ArrayList<>();
-        Position iteration = new Position(positionY + deltaY, positionX + deltaX);
-
-        while (iteration.isValid()) {
-            result.add(iteration);
-            iteration = new Position(iteration.getY() + deltaY, iteration.getX() + deltaX);
-        }
-
-        return result;
     }
 
 
@@ -1090,8 +1008,8 @@ public class Board {
 
     private boolean shouldWeChangePieceToDame(OneFigure piece) {
         if (piece.getFigure() == DAME) return false;
-        if (piece.getColor() == DARK && piece.getPosition().getY() == 7) return true;
-        if (piece.getColor() == LIGHT && piece.getPosition().getY() == 0) return true;
+        if (piece.getColor() == DARK && piece.getPosition().getY() == LAST_COORDINATE) return true;
+        if (piece.getColor() == LIGHT && piece.getPosition().getY() == FIRST_COORDINATE) return true;
         return false;
     }
 
@@ -1119,18 +1037,183 @@ public class Board {
         int pieceColor = piece.getColor();
 
         if (isDameMoving(pawnOrDame)) {
-//            dameCapturingListener(position, pieceColor);
+            dameCapturingListener(position, pieceColor);
         } else {
             pawnCapturingListener(position, pieceColor);
         }
     }
 
-    private void pawnCapturingListener(Position positionToBeListen, int positionPieceColor) {
+    //////////////////////////////////// DAME ////////////////////////////////
 
-        Position positionLeftTop = new Position(positionToBeListen.getY() + 1, positionToBeListen.getX() - 1);
-        Position positionRightTop = new Position(positionToBeListen.getY() + 1, positionToBeListen.getX() + 1);
-        Position positionLeftBottom = new Position(positionToBeListen.getY() - 1, positionToBeListen.getX() - 1);
-        Position positionRightBottom = new Position(positionToBeListen.getY() - 1, positionToBeListen.getX() + 1);
+    private void dameCapturingListener(Position dameToBeListen, int dameColor) {
+        // 1. get all diagonals, ie. dame paths divided by current dame position
+        List<List<Position>> allDiagonalsSplit = getDiagonalsSplitByPosition(dameToBeListen);
+
+        System.out.println("allDiagonalsSplit: " + YELLOW + allDiagonalsSplit + RESET);
+//        List<Position> opponentPiecesOnDamePath = allDiagonalsSplit.stream()
+//                .filter(p -> getOpponentPiecesOnDiagonal(p, dameColor).isEmpty())
+//                .flatMap(Collection::stream)
+//                .collect(Collectors.toList());
+        // 2. find any opponents on this diagonals
+        List<Position> opponentPiecesOnDamePath = new ArrayList<>();
+        allDiagonalsSplit.forEach(p -> opponentPiecesOnDamePath.addAll(getOpponentPiecesOnDiagonal(p, dameColor)));
+
+        System.out.println("opponentPiecesOnDamePath: " + YELLOW + opponentPiecesOnDamePath + RESET);
+
+        // 3. remove opponents which has other piece(s) on the path , ie. cannot be captured
+        List<Position> filteredOpponentPiecesOnDamePath = opponentPiecesOnDamePath.stream()
+                .filter(p -> noOtherPiecesInBetween(dameToBeListen, p))
+                .collect(Collectors.toList());
+
+        System.out.println("filteredOpponentPiecesOnDamePath: " + YELLOW + filteredOpponentPiecesOnDamePath + RESET);
+
+        Map<Position, List<Position>> toBeRemoved_MandatoryPositionsTo = new HashMap<>();
+        positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(dameToBeListen, toBeRemoved_MandatoryPositionsTo);
+//        filteredOpponentPiecesOnDamePath.forEach(p ->
+//                toBeRemoved_MandatoryPositionsTo.put(p, getEmptyFieldsAfterByPossibleCapturing(dameToBeListen, p))
+//        );
+        // 4. get possible positions of the dame after capturing
+        for (Position p : filteredOpponentPiecesOnDamePath) {
+            toBeRemoved_MandatoryPositionsTo.put(p, getEmptyFieldsAfterByPossibleCapturing(dameToBeListen, p));
+        }
+
+        System.out.println("emptyFieldsAfterByPossibleCapturing: " + YELLOW + positionsFrom_ToBeRemoved_MandatoryPositionsTo + RESET);
+
+    }
+
+    private List<List<Position>> getDiagonalsSplitByPosition(Position position) {
+        List<List<Position>> result = new ArrayList<>();
+
+        List<Position> result1 = getIterations(position, 1, 1);
+        List<Position> result2 = getIterations(position, -1, 1);
+        List<Position> result3 = getIterations(position, 1, -1);
+        List<Position> result4 = getIterations(position, -1, -1);
+
+        result.add(result1);
+        result.add(result2);
+        result.add(result3);
+        result.add(result4);
+
+        return result;
+    }
+
+    private List<Position> getOpponentPiecesOnDiagonal(List<Position> diagonalSplit, int dameColor) {
+        if (diagonalSplit.size() <= 1) return Collections.emptyList();
+        return diagonalSplit.stream().filter(p -> players.containsKey(p) && players.get(p).getColor() != dameColor).collect(Collectors.toList());
+    }
+
+    private boolean noOtherPiecesInBetween(Position positionOne, Position positionTwo) {
+        List<Position> piecesInBetween = getFieldsInBetween(positionOne, positionTwo);
+        for (Position p : piecesInBetween) {
+            if (players.containsKey(p)) return false;
+        }
+        return true;
+    }
+
+    private List<Position> getEmptyFieldsAfterByPossibleCapturing(Position positionDame, Position justMovedTo) {
+        List<Position> emptyFieldsAfter = getEmptyFieldsAfter(positionDame, justMovedTo);
+        int opponentColor = players.get(justMovedTo).getColor();
+
+        List<Position> result = new ArrayList<>();
+        emptyFieldsAfter.forEach(p -> {
+            if (canCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
+                result.add(p);
+//                System.out.println("Can continue capturing after dame movement: " + RED + p + RESET);
+            }
+        });
+
+        if (result.isEmpty()) {
+            return emptyFieldsAfter;
+        }
+
+        return result;
+    }
+
+
+
+
+
+    private List<Position> getFieldsInBetween(Position positionOne, Position positionTwo) {
+        int oneX = positionOne.getX();
+        int oneY = positionOne.getY();
+        int twoX = positionTwo.getX();
+        int twoY = positionTwo.getY();
+
+        int deltaX = Math.abs(oneX - twoX);
+        int deltaY = Math.abs(oneY - twoY);
+
+        if (deltaX != deltaY) {
+            System.out.println(RED + "INTERNAL MESSAGE: problem with diagonal distance in getFieldsInBetween (to be removed in production version)" + RESET);
+            return Collections.emptyList();
+        }
+
+        if (deltaX <= 1) {
+            System.out.println(RED + "INTERNAL MESSAGE: no empty fields in between (to be removed in production version)" + RESET);
+            return Collections.emptyList();
+        }
+
+        List<Position> result = new ArrayList<>(deltaX - 1);
+        while (deltaX-- > 1) {
+            result.add(new Position(
+                    oneY > twoY ? oneY - deltaX : oneY + deltaX,
+                    oneX > twoX ? oneX - deltaX : oneX + deltaX
+            ));
+        }
+
+        return result;
+    }
+
+
+    private List<Position> getEmptyFieldsAfter(Position positionDame, Position justMovedTo) {
+//        if (positionAfter.isEmpty()) {
+//            System.out.println(RED + "INTERNAL MESSAGE: problem with getEmptyFieldsAfter, should not be empty (to be removed in production version)" + RESET);
+//            return Collections.emptyList();
+//        }
+        int justMovedToX = justMovedTo.getX();
+        int justMovedToY = justMovedTo.getY();
+        int positionDameX = positionDame.getX();
+        int positionDameY = positionDame.getY();
+
+        int deltaX = justMovedToX > positionDameX ? 1 : -1;
+        int deltaY = justMovedToY > positionDameY ? 1 : -1;
+
+        List<Position> result = new ArrayList<>();
+        Position positionAfter = new Position(justMovedToY + deltaY, justMovedToX + deltaX);
+
+        while (!players.containsKey(positionAfter) && positionAfter.isValid()) {
+            result.add(positionAfter);
+            positionAfter = new Position(
+                    positionAfter.getY() + deltaY,
+                    positionAfter.getX() + deltaX
+            );
+        }
+
+        return result;
+    }
+
+    private List<Position> getIterations(Position position, int deltaX, int deltaY) {
+        int positionY = position.getY();
+        int positionX = position.getX();
+
+        List<Position> result = new ArrayList<>();
+        Position iteration = new Position(positionY + deltaY, positionX + deltaX);
+
+        while (iteration.isValid()) {
+            result.add(iteration);
+            iteration = new Position(iteration.getY() + deltaY, iteration.getX() + deltaX);
+        }
+
+        return result;
+    }
+
+    //////////////////////////////////// PAWN /////////////////////////////////
+
+    private void pawnCapturingListener(Position pawnToBeListen, int pawnColor) {
+
+        Position positionLeftTop = new Position(pawnToBeListen.getY() + 1, pawnToBeListen.getX() - 1);
+        Position positionRightTop = new Position(pawnToBeListen.getY() + 1, pawnToBeListen.getX() + 1);
+        Position positionLeftBottom = new Position(pawnToBeListen.getY() - 1, pawnToBeListen.getX() - 1);
+        Position positionRightBottom = new Position(pawnToBeListen.getY() - 1, pawnToBeListen.getX() + 1);
 
         Position[] positionsNextToBeListen = {positionLeftTop, positionRightTop, positionLeftBottom, positionRightBottom};
 
@@ -1139,7 +1222,7 @@ public class Board {
         List<Position> opponentsNextToBeListen = new ArrayList<>(4);
         // is position next to me exist and contain any piece && is this piece is opponent piece (different color)
         for (Position p : positionsNextToBeListen) {
-            if (players.containsKey(p) && players.get(p).getColor() != positionPieceColor) {
+            if (players.containsKey(p) && players.get(p).getColor() != pawnColor) {
                 opponentsNextToBeListen.add(p);
             }
         }
@@ -1152,19 +1235,19 @@ public class Board {
 
         Position positionAfter;
         for (Position positionToBeRemoved : opponentsNextToBeListen) {
-            positionAfter = getFieldAfter(positionToBeListen, positionToBeRemoved);
+            positionAfter = getFieldAfter(pawnToBeListen, positionToBeRemoved);
             if (positionAfter.isValid() && !players.containsKey(positionAfter)) {
                 Position finalPositionAfter = positionAfter;
                 // TODO: start - do oddzielnej metody
-                if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(positionToBeListen)) {
+                if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(pawnToBeListen)) {
                     positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(
-                            positionToBeListen,
+                            pawnToBeListen,
                             new HashMap<>() {{
                                 put(positionToBeRemoved, Arrays.asList(finalPositionAfter));
                             }}
                     );
                 } else {
-                    positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionToBeListen)
+                    positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(pawnToBeListen)
                             .put(positionToBeRemoved, Arrays.asList(positionAfter));
                 }
                 // TODO: end - do oddzilenje metody
