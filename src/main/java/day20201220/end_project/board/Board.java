@@ -5,6 +5,7 @@ import day20201220.end_project.figure.Empty;
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
 import day20201220.end_project.figure.SixFigures;
+import javafx.geometry.Pos;
 import lombok.Getter;
 
 import java.util.*;
@@ -26,6 +27,7 @@ public class Board {
     private List<Position> piecesToBeRemoved;
 
     //    private Map<Position, List<Position>> toBeRemoved_MandatoryPositions;
+    private String winMessage;
     private Map<Position, Map<Position, List<Position>>> positionsFrom_ToBeRemoved_MandatoryPositionsTo;
     private int darkOrLight;
     private boolean hasCapturedInPreviosuRound;
@@ -40,8 +42,9 @@ public class Board {
         this.piecesToBeRemoved = new ArrayList<>();
 
 //        this.toBeRemoved_MandatoryPositions = new HashMap<>();
+        this.winMessage = "";
         this.positionsFrom_ToBeRemoved_MandatoryPositionsTo = new HashMap<>();
-        darkOrLight = 1;
+        this.darkOrLight = 1;
         this.hasCapturedInPreviosuRound = false;
     }
 
@@ -157,9 +160,29 @@ public class Board {
 
         System.out.println("  " + A + "  " + B + " " + C + "  " + D + " " + E + "  " + F + " " + G + " " + H);
 
-        players.entrySet().stream()
-                .collect(Collectors.groupingBy(e -> e.getValue().getColor(), Collectors.counting()))
-                .forEach((k, v) -> System.out.printf("%s = #%2d piece(s)\n", (k == 0 ? "Dark " : "Light"), v));
+//        players.entrySet().stream()
+//                .collect(Collectors.groupingBy(e -> e.getValue().getColor(), Collectors.counting()))
+//                .forEach((k, v) -> {
+//                    System.out.printf("%s = #%2d piece(s)\n", (k == 0 ? "Dark " : "Light"), v);
+//                    if (v == 0) {
+//                        winMessage = (k == 0 ? "DARK " : "LIGHT") + " PLAYER HAS WON THE GAME... CONGRATULATIONS !!!";
+//                    }
+//                });
+//        if(!winMessage.isEmpty()) {
+//            System.out.println("\n" + BLUE + winMessage + RESET + "\n");
+//        }
+        long lightPieces = countPieces(1);
+        long darkPieces = countPieces(0);
+        System.out.printf("Light = #%2d piece(s)\n", lightPieces);
+        System.out.printf("Dark  = #%2d piece(s)\n", darkPieces);
+
+        if (lightPieces == 0 || darkPieces == 0) {
+            System.out.println(BLUE + "\n!!! " + (lightPieces == 0 ? "DARK" : "LIGHT") + " PLAYER HAS WON THE GAME... CONGRATULATIONS !!!\n" + RESET);
+        }
+    }
+
+    private long countPieces(int darkOrLight) {
+        return players.entrySet().stream().filter(p-> p.getValue().getColor() == darkOrLight).count();
     }
 
     public void placeFiguresFromLong(long number) {
@@ -253,11 +276,11 @@ public class Board {
             }
         }
 
-        // 2. change light to dark (back and forth)
+        // 2. check is appropriate color moving
         OneFigure piece = players.get(positionFrom);
         if (piece.getColor() != darkOrLight) {
-            System.out.println(BLUE + "RULE:" + RESET + " movement needs to be altering... it is not " +
-                    BLUE + (piece.getColor() == 0 ? "Dark" : "light") + RESET + " turn (" + RED +
+            System.out.println(BLUE + "RULE:" + RESET + " movement needs to be altering... its " +
+                    BLUE + (piece.getColor() == 0 ? "Light" : "Dark") + RESET + " turn now (" + RED +
                     "movement was not proceeded, try again" + RESET + ")");
             return false;
         }
@@ -267,20 +290,29 @@ public class Board {
 
 
         if (hasCapturedInPreviosuRound) {
+            // 4. change pawn to dame if needed
+            if (shouldWeChangePieceToDame(piece)) {
+                String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
+                System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
+                        " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
+                        "... congratulation " + playersColor + " player");
+                changePawnToDame(piece);
+            }
             singlePieceCapturingListener(players.get(positionTo));
             if (positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
-                // 4. change pawn to dame if needed
-                if (shouldWeChangePieceToDame(piece)) {
-                    String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
-                    System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
-                            " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
-                            "... congratulation " + playersColor + " player");
-                    changePawnToDame(piece);
-                }
+//                // 4. change pawn to dame if needed
+//                if (shouldWeChangePieceToDame(piece)) {
+//                    String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
+//                    System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
+//                            " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
+//                            "... congratulation " + playersColor + " player");
+//                    changePawnToDame(piece);
+//                }
                 // 5. change next player color
                 darkOrLight = changeDarkLightTurn(darkOrLight);
                 // 6. is there anything-to-capture listener
                 capturingListener(darkOrLight);
+
             }
             hasCapturedInPreviosuRound = false;
         } else {
@@ -695,7 +727,8 @@ public class Board {
         if (!arePositionsOnTheSameDiagonal(justMovedTo, positionDame) || !noOtherPiecesInBetween(justMovedTo, positionDame)) {
             return false;
         }
-        List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(positionDame, justMovedTo);
+
+        List<Position> emptyFieldsAfter = getEmptyFieldsAfterByPossibleCapturing(positionDame, justMovedTo).get();
         if (emptyFieldsAfter.isEmpty()) {
             return false;
         }
@@ -1049,7 +1082,8 @@ public class Board {
         // 1. get all diagonals, ie. dame paths divided by current dame position
         List<List<Position>> allDiagonalsSplit = getDiagonalsSplitByPosition(dameToBeListen);
 
-        System.out.println("allDiagonalsSplit: " + YELLOW + allDiagonalsSplit + RESET);
+//        System.out.println("dameToBeListen: " + YELLOW + dameToBeListen + RESET);
+//        System.out.println("allDiagonalsSplit: " + YELLOW + allDiagonalsSplit + RESET);
 //        List<Position> opponentPiecesOnDamePath = allDiagonalsSplit.stream()
 //                .filter(p -> getOpponentPiecesOnDiagonal(p, dameColor).isEmpty())
 //                .flatMap(Collection::stream)
@@ -1058,26 +1092,29 @@ public class Board {
         List<Position> opponentPiecesOnDamePath = new ArrayList<>();
         allDiagonalsSplit.forEach(p -> opponentPiecesOnDamePath.addAll(getOpponentPiecesOnDiagonal(p, dameColor)));
 
-        System.out.println("opponentPiecesOnDamePath: " + YELLOW + opponentPiecesOnDamePath + RESET);
+//        System.out.println("opponentPiecesOnDamePath: " + YELLOW + opponentPiecesOnDamePath + RESET);
 
         // 3. remove opponents which has other piece(s) on the path , ie. cannot be captured
         List<Position> filteredOpponentPiecesOnDamePath = opponentPiecesOnDamePath.stream()
                 .filter(p -> noOtherPiecesInBetween(dameToBeListen, p))
                 .collect(Collectors.toList());
 
-        System.out.println("filteredOpponentPiecesOnDamePath: " + YELLOW + filteredOpponentPiecesOnDamePath + RESET);
+//        System.out.println("filteredOpponentPiecesOnDamePath: " + YELLOW + filteredOpponentPiecesOnDamePath + RESET);
 
-        Map<Position, List<Position>> toBeRemoved_MandatoryPositionsTo = new HashMap<>();
-        positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(dameToBeListen, toBeRemoved_MandatoryPositionsTo);
+//        Map<Position, List<Position>> toBeRemoved_MandatoryPositionsTo = new HashMap<>();
+//        positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(dameToBeListen, toBeRemoved_MandatoryPositionsTo);
 //        filteredOpponentPiecesOnDamePath.forEach(p ->
 //                toBeRemoved_MandatoryPositionsTo.put(p, getEmptyFieldsAfterByPossibleCapturing(dameToBeListen, p))
 //        );
         // 4. get possible positions of the dame after capturing
         for (Position p : filteredOpponentPiecesOnDamePath) {
-            toBeRemoved_MandatoryPositionsTo.put(p, getEmptyFieldsAfterByPossibleCapturing(dameToBeListen, p));
+            getEmptyFieldsAfterByPossibleCapturing(dameToBeListen, p).ifPresent(fields ->
+//                    toBeRemoved_MandatoryPositionsTo.put(p, fields)
+                            addRecordToCapturingMap(dameToBeListen, p, fields)
+            );
         }
 
-        System.out.println("emptyFieldsAfterByPossibleCapturing: " + YELLOW + positionsFrom_ToBeRemoved_MandatoryPositionsTo + RESET);
+//        System.out.println("positionsFrom_ToBeRemoved_MandatoryPositionsTo: " + YELLOW + positionsFrom_ToBeRemoved_MandatoryPositionsTo + RESET);
 
     }
 
@@ -1110,27 +1147,52 @@ public class Board {
         return true;
     }
 
-    private List<Position> getEmptyFieldsAfterByPossibleCapturing(Position positionDame, Position justMovedTo) {
+    private Optional<List<Position>> getEmptyFieldsAfterByPossibleCapturing(Position positionDame, Position justMovedTo) {
         List<Position> emptyFieldsAfter = getEmptyFieldsAfter(positionDame, justMovedTo);
+        if (emptyFieldsAfter.isEmpty()) return Optional.empty();
+
         int opponentColor = players.get(justMovedTo).getColor();
 
         List<Position> result = new ArrayList<>();
         emptyFieldsAfter.forEach(p -> {
             if (canCapturingByDame(p, justMovedTo, DAME, opponentColor)) {  // TODO: dodaje justMovedTo bo jeszcze nie usuwa zbitego
                 result.add(p);
-//                System.out.println("Can continue capturing after dame movement: " + RED + p + RESET);
             }
         });
 
         if (result.isEmpty()) {
-            return emptyFieldsAfter;
+            return Optional.of(emptyFieldsAfter);
+        }
+
+        return Optional.of(result);
+    }
+
+    private List<Position> getEmptyFieldsAfter(Position positionDame, Position justMovedTo) {
+//        if (positionAfter.isEmpty()) {
+//            System.out.println(RED + "INTERNAL MESSAGE: problem with getEmptyFieldsAfter, should not be empty (to be removed in production version)" + RESET);
+//            return Collections.emptyList();
+//        }
+        int justMovedToX = justMovedTo.getX();
+        int justMovedToY = justMovedTo.getY();
+        int positionDameX = positionDame.getX();
+        int positionDameY = positionDame.getY();
+
+        int deltaX = justMovedToX > positionDameX ? 1 : -1;
+        int deltaY = justMovedToY > positionDameY ? 1 : -1;
+
+        List<Position> result = new ArrayList<>();
+        Position positionAfter = new Position(justMovedToY + deltaY, justMovedToX + deltaX);
+
+        while (!players.containsKey(positionAfter) && positionAfter.isValid()) {
+            result.add(positionAfter);
+            positionAfter = new Position(
+                    positionAfter.getY() + deltaY,
+                    positionAfter.getX() + deltaX
+            );
         }
 
         return result;
     }
-
-
-
 
 
     private List<Position> getFieldsInBetween(Position positionOne, Position positionTwo) {
@@ -1158,34 +1220,6 @@ public class Board {
                     oneY > twoY ? oneY - deltaX : oneY + deltaX,
                     oneX > twoX ? oneX - deltaX : oneX + deltaX
             ));
-        }
-
-        return result;
-    }
-
-
-    private List<Position> getEmptyFieldsAfter(Position positionDame, Position justMovedTo) {
-//        if (positionAfter.isEmpty()) {
-//            System.out.println(RED + "INTERNAL MESSAGE: problem with getEmptyFieldsAfter, should not be empty (to be removed in production version)" + RESET);
-//            return Collections.emptyList();
-//        }
-        int justMovedToX = justMovedTo.getX();
-        int justMovedToY = justMovedTo.getY();
-        int positionDameX = positionDame.getX();
-        int positionDameY = positionDame.getY();
-
-        int deltaX = justMovedToX > positionDameX ? 1 : -1;
-        int deltaY = justMovedToY > positionDameY ? 1 : -1;
-
-        List<Position> result = new ArrayList<>();
-        Position positionAfter = new Position(justMovedToY + deltaY, justMovedToX + deltaX);
-
-        while (!players.containsKey(positionAfter) && positionAfter.isValid()) {
-            result.add(positionAfter);
-            positionAfter = new Position(
-                    positionAfter.getY() + deltaY,
-                    positionAfter.getX() + deltaX
-            );
         }
 
         return result;
@@ -1238,7 +1272,7 @@ public class Board {
             positionAfter = getFieldAfter(pawnToBeListen, positionToBeRemoved);
             if (positionAfter.isValid() && !players.containsKey(positionAfter)) {
                 Position finalPositionAfter = positionAfter;
-                // TODO: start - do oddzielnej metody
+                // TODO: start - do oddzielnej metody - addRecordToCapturingMap
                 if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(pawnToBeListen)) {
                     positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(
                             pawnToBeListen,
@@ -1250,7 +1284,7 @@ public class Board {
                     positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(pawnToBeListen)
                             .put(positionToBeRemoved, Arrays.asList(positionAfter));
                 }
-                // TODO: end - do oddzilenje metody
+                // TODO: end - do oddzilenje metody - addRecordToCapturingMap
             }
 
         }
@@ -1278,6 +1312,20 @@ public class Board {
                 positionOpponent.getY() + deltaY,
                 positionOpponent.getX() + deltaX
         );
+    }
+
+    private void addRecordToCapturingMap(Position positionToBeListen, Position positionToBeRemoved, List<Position> positionsAfter) {
+        if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(positionToBeListen)) {
+            positionsFrom_ToBeRemoved_MandatoryPositionsTo.put(
+                    positionToBeListen,
+                    new HashMap<>() {{
+                        put(positionToBeRemoved, positionsAfter);
+                    }}
+            );
+        } else {
+            positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionToBeListen)
+                    .put(positionToBeRemoved, positionsAfter);
+        }
     }
 
 //////////////////////////////////////// DAME /////////////////////////////////////////////////////////////////////////////////
