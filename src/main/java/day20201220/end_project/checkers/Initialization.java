@@ -1,7 +1,6 @@
-package day20201220.end_project.checker;
+package day20201220.end_project.checkers;
 
 import day20201220.end_project.Player;
-import day20201220.end_project.checker.Position;
 import day20201220.end_project.figure.Empty;
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
@@ -95,9 +94,8 @@ public class Initialization {
     }
 
     public void printMap() {
-        board.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(e -> {
-            System.out.println(e.getKey() + " = " + e.getValue());
-        });
+        board.entrySet().stream().sorted(Map.Entry.comparingByKey())
+                .forEach(e -> System.out.println(e.getKey() + " = " + e.getValue()));
     }
 
     private void placeFiguresFromLong(long number) {

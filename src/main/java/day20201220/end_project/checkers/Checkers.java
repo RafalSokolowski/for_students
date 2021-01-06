@@ -1,7 +1,4 @@
-package day20201220.end_project.checker;
-
-import day20201220.end_project.utils.Messages;
-import day20201220.end_project.utils.Print;
+package day20201220.end_project.checkers;
 
 import java.util.Scanner;
 

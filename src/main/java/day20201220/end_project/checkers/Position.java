@@ -1,4 +1,4 @@
-package day20201220.end_project.checker;
+package day20201220.end_project.checkers;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

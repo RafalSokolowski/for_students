@@ -1,4 +1,4 @@
-package day20201220.end_project.checker;
+package day20201220.end_project.checkers;
 
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
@@ -133,9 +133,7 @@ public class Movement {
             System.out.print(Messages.ruleMovement1(darkOrLight, players.get(positionTo).getFigure(), k));
 
             AtomicInteger counter = new AtomicInteger(1);
-            v.forEach((keyV, valueV) -> {
-                System.out.print(Messages.ruleMovement2(counter.getAndIncrement(), valueV, keyV));
-            });
+            v.forEach((keyV, valueV) -> System.out.print(Messages.ruleMovement2(counter.getAndIncrement(), valueV, keyV)));
             System.out.println();
         });
     }

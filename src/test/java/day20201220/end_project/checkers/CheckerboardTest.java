@@ -1,4 +1,4 @@
-package day20201220.end_project.checker;
+package day20201220.end_project.checkers;
 
 import day20201220.end_project.figure.OneFigure;
 import org.junit.Assert;

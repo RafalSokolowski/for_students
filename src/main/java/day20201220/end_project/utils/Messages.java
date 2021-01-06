@@ -1,6 +1,6 @@
 package day20201220.end_project.utils;
 
-import day20201220.end_project.checker.Position;
+import day20201220.end_project.checkers.Position;
 
 import java.util.List;
 
