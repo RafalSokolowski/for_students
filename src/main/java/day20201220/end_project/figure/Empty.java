@@ -11,20 +11,14 @@ import static day20201220.end_project.utils.Const.*;
 @AllArgsConstructor
 public class Empty implements OnTheBoard, Comparable<Empty> {
 
-    private int color;     // 0-black, 1-white
-    private int y;          // y position
-    private int x;          // x position
-
-//    @Override
-//    public int compareTo(Empty empty) {
-//        if (x == empty.getX()) return y - empty.getY();
-//        return x - empty.getX();
-//    }
+    private int color;  // 0-black, 1-white
+    private int y;      // y position
+    private int x;      // x position
 
     @Override
     public int compareTo(Empty empty) {
-        if (y == empty.getY()) return x-empty.getX();
-        return y-empty.getY();
+        if (y == empty.getY()) return x - empty.getX();
+        return y - empty.getY();
     }
 
     public String values() {

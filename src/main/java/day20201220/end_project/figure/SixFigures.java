@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class SixFigures {
 
-    private OneFigure first;            // TODO: odwrotnie numeracja OneFigure
+    private OneFigure first;
     private OneFigure second;
     private OneFigure third;
     private OneFigure fourth;
@@ -29,10 +29,10 @@ public class SixFigures {
     }
 
     public SixFigures(long number) {
-        this.first = new OneFigure(number >> 9*5 & 0b111111111);
-        this.second = new OneFigure(number >> 9*4 & 0b111111111);
-        this.third = new OneFigure(number >> 9*3 & 0b111111111);
-        this.fourth = new OneFigure(number >> 9*2 & 0b111111111);
+        this.first = new OneFigure(number >> 9 * 5 & 0b111111111);
+        this.second = new OneFigure(number >> 9 * 4 & 0b111111111);
+        this.third = new OneFigure(number >> 9 * 3 & 0b111111111);
+        this.fourth = new OneFigure(number >> 9 * 2 & 0b111111111);
         this.fifth = new OneFigure(number >> 9 & 0b111111111);
         this.sixth = new OneFigure(number & 0b111111111);
     }
@@ -44,7 +44,7 @@ public class SixFigures {
 
     public void print() {
         System.out.printf(
-                        "First  - %s\n" +
+                "First  - %s\n" +
                         "Second - %s\n" +
                         "Third  - %s\n" +
                         "Forth  - %s\n" +
@@ -56,7 +56,6 @@ public class SixFigures {
 
     @Override
     public String toString() {
-//        return "" + empty + BLUE + first + RESET + second + BLUE + third + RESET + fort + BLUE + fifth + RESET + sixth;
         return "" + first + second + third + fourth + fifth + sixth;
     }
 }

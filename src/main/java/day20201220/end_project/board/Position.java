@@ -38,9 +38,6 @@ public class Position implements Comparable<Position> {
             return false;
         }
         try {
-//            String[] positionStringTab = positionString.split("");
-//            int x = Integer.parseInt(positionStringTab[0]);
-//            int y = Integer.parseInt(positionStringTab[1]);
             int[] yx = getYXFromString(positionString);
             return new Position(yx[0], yx[1]).isValid();
         } catch (NumberFormatException e) {
@@ -55,14 +52,6 @@ public class Position implements Comparable<Position> {
         return new int[]{y, x};
     }
 
-    private Integer tryParseToInteger(String string) {
-        try {
-            return Integer.parseInt(string);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
     @Override
     public int compareTo(Position p) {
         if (y == p.getY()) return x - p.getX();
@@ -71,7 +60,6 @@ public class Position implements Comparable<Position> {
 
     @Override
     public String toString() {
-//        return "(" + (char) (x+65) + "," + (y+1) + ")";
         return "" + (char) (x + 65) + (y + 1);
     }
 }

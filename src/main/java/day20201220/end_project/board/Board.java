@@ -5,14 +5,12 @@ import day20201220.end_project.figure.Empty;
 import day20201220.end_project.figure.OnTheBoard;
 import day20201220.end_project.figure.OneFigure;
 import day20201220.end_project.figure.SixFigures;
-import javafx.geometry.Pos;
 import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-// TODO: posprawdzeć importy i może rozdzielić Const na typy stałych (eg figury oddzielnie i kolory)?
 import static day20201220.end_project.utils.Const.*;
 
 @Getter
@@ -160,24 +158,14 @@ public class Board {
 
         System.out.println("  " + A + "  " + B + " " + C + "  " + D + " " + E + "  " + F + " " + G + " " + H);
 
-//        players.entrySet().stream()
-//                .collect(Collectors.groupingBy(e -> e.getValue().getColor(), Collectors.counting()))
-//                .forEach((k, v) -> {
-//                    System.out.printf("%s = #%2d piece(s)\n", (k == 0 ? "Dark " : "Light"), v);
-//                    if (v == 0) {
-//                        winMessage = (k == 0 ? "DARK " : "LIGHT") + " PLAYER HAS WON THE GAME... CONGRATULATIONS !!!";
-//                    }
-//                });
-//        if(!winMessage.isEmpty()) {
-//            System.out.println("\n" + BLUE + winMessage + RESET + "\n");
-//        }
         long lightPieces = countPieces(1);
         long darkPieces = countPieces(0);
         System.out.printf("Light = #%2d piece(s)\n", lightPieces);
         System.out.printf("Dark  = #%2d piece(s)\n", darkPieces);
 
         if (lightPieces == 0 || darkPieces == 0) {
-            System.out.println(BLUE + "\n!!! " + (lightPieces == 0 ? "DARK" : "LIGHT") + " PLAYER HAS WON THE GAME... CONGRATULATIONS !!!\n" + RESET);
+            System.out.println(BLUE + "\n!!! " + (lightPieces == 0 ? "DARK" : "LIGHT") +
+                    " PLAYER HAS WON THE GAME... CONGRATULATIONS !!!\n" + RESET);
         }
     }
 
@@ -188,7 +176,7 @@ public class Board {
     public void placeFiguresFromLong(long number) {
         SixFigures sixFigures = new SixFigures(number);
 
-        OneFigure first = sixFigures.getFirst();        // 100 011 001 -> 3,1
+        OneFigure first = sixFigures.getFirst();
         OneFigure second = sixFigures.getSecond();
         OneFigure third = sixFigures.getThird();
         OneFigure fourth = sixFigures.getFourth();
@@ -211,12 +199,7 @@ public class Board {
         Position positionFrom = getPositionFromString(stringFrom);
         Position positionTo = getPositionFromString(stringTo);
 
-
-        // Check whether there are any mandatory movements
-//        while (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty() || hasJustCaptured) {
         if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
-
-
             if (!positionsFrom_ToBeRemoved_MandatoryPositionsTo.containsKey(positionFrom)) {
                 System.out.println(RED + "ERROR:" + RESET + " This move was not proceed" + RED +
                         " (incorrect position from - " + positionFrom + ")" + RESET +
@@ -229,14 +212,6 @@ public class Board {
                     .get(positionFrom).values()
                     .stream().flatMap(Collection::stream)
                     .collect(Collectors.toList());
-
-//            System.out.println();
-//            System.out.println("1.                 PositionFrom: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.keySet());
-//            System.out.println("2.          Map by positionFrom: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom));
-//            System.out.println("3.        Positions toBeRemoved: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom).keySet());
-//            System.out.println("4. Possible mandatory movements: " + positionsFrom_ToBeRemoved_MandatoryPositionsTo.get(positionFrom).values());
-//            System.out.println("5.   Mandatory positions merged: " + allMandatoryPositions);
-//            System.out.println("\n");
 
             if (!allMandatoryPositions.contains(positionTo)) {
                 System.out.println(RED + "ERROR:" + RESET + " This move was not proceed" + RED +
@@ -254,20 +229,6 @@ public class Board {
                     hasCapturedInPreviosuRound = true;
                 }
             });
-
-
-//            // 3. update piece move from to
-//            updateMovedPiece(positionFrom, positionTo);
-//
-//            // 4. change pawn to dame if needed
-//            if (shouldWeChangePieceToDame(players.get(positionTo))) {
-//                String playersColor = players.get(positionFrom).getColor() == DARK ? "Dark" : "Light";
-//                System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
-//                        " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
-//                        "... congratulation " + playersColor + " player");
-//                changePawnToDame(players.get(positionFrom));
-//            }
-
 
         } else {
             // 1. is movement valid
@@ -300,14 +261,6 @@ public class Board {
             }
             singlePieceCapturingListener(players.get(positionTo));
             if (positionsFrom_ToBeRemoved_MandatoryPositionsTo.isEmpty()) {
-//                // 4. change pawn to dame if needed
-//                if (shouldWeChangePieceToDame(piece)) {
-//                    String playersColor = piece.getColor() == DARK ? "Dark" : "Light";
-//                    System.out.println(BLUE + "RULE:" + RESET + " " + playersColor +
-//                            " player piece reached the crownhead and " + BLUE + "becomes the Dame" + RESET +
-//                            "... congratulation " + playersColor + " player");
-//                    changePawnToDame(piece);
-//                }
                 // 5. change next player color
                 darkOrLight = changeDarkLightTurn(darkOrLight);
                 // 6. is there anything-to-capture listener
@@ -354,7 +307,6 @@ public class Board {
     //////////////////////  MOVEMENT - old working approach ///////////////////////////////////////////////////////////////////////////////////////
 
     // TODO: add loggers
-    // TODO: ustalić ograniczenie ruchu na zmianę
     public boolean movePieceByString_oldWorkingApproach(String stringFrom, String stringTo) {
         Position positionFrom = getPositionFromString(stringFrom);
         Position positionTo = getPositionFromString(stringTo);
@@ -470,29 +422,6 @@ public class Board {
         Position positionFrom = getPositionFromString(stringFrom);
         Position positionTo = getPositionFromString(stringTo);
 
-//        if (ifPieceFromNotOnTheBoard(positionFrom)) {
-//            System.out.println(RED + "ERROR:" + RESET + " Cannot move from " + RED + stringFrom + RESET +
-//                    " direction... there is no player's piece");
-//            return true;
-//        }
-//
-//        if (isPositionNotExists(positionTo)) {
-//            System.out.println(RED + "ERROR:" + RESET + " Cannot move to " + RED + stringTo + RESET +
-//                    " direction... this direction does not exist on the board");
-//            return true;
-//        }
-//        if (isPositionTakenByOtherPiece(positionTo)) {
-//            System.out.println(RED + "ERROR:" + RESET + " Cannot move to " + RED + stringTo + RESET +
-//                    " direction... this direction is taken by the other piece");
-//            return true;
-//        }
-//
-//        int pieceColor = players.get(positionFrom).getColor();
-//        if (isPieceMovementInvalid(positionFrom, positionTo, pieceColor)) {
-//            System.out.println(RED + "ERROR:" + RESET + " this movement is not allowed and "
-//                    + RED + "was not proceed" + RESET + ", see above for details");
-//            return true;
-//        }
         if (isMovementPositionsAreNotCorrect(positionFrom, positionTo)) {
             return true;
         }
@@ -567,13 +496,6 @@ public class Board {
         return pawnOrDame == PAWN ?
                 isPawnMovementInvalid(positionFrom, positionTo, color) :
                 isDameMovementInvalid(positionFrom, positionTo);
-
-//        if (pawnOrDame == PAWN) {
-//            return isPawnMovementInvalid(positionFrom, positionTo, color);    // Pawn is moving
-//        } else {
-//            return isDameMovementInvalid(positionFrom, positionTo);           // Dame is moving
-//        }
-
     }
 
     private boolean isPawnMovementInvalid(Position positionFrom, Position positionTo, int pieceColor) {
