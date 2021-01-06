@@ -1,10 +1,10 @@
-package day20201220.end_project.board;
+package day20201220.end_project.checker;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import static day20201220.end_project.utils.Const.INVALID_COORDINATE;
+import static day20201220.end_project.utils.Const.*;
 
 @Getter
 @EqualsAndHashCode
@@ -26,11 +26,17 @@ public class Position implements Comparable<Position> {
     }
 
     public boolean isInvalid() {
-        return x < 0 || x >= 7 || y < 0 || y >= 7;
+        return x < FIRST_COORDINATE ||
+                x >= LAST_COORDINATE ||
+                y < FIRST_COORDINATE ||
+                y >= LAST_COORDINATE;
     }
 
     public boolean isValid() {
-        return x >= 0 && x <= 7 && y >= 0 && y <= 7;
+        return x >= FIRST_COORDINATE &&
+                x <= LAST_COORDINATE &&
+                y >= FIRST_COORDINATE &&
+                y <= LAST_COORDINATE;
     }
 
     private boolean isPositionStringValid(String positionString) {
@@ -47,8 +53,8 @@ public class Position implements Comparable<Position> {
 
     private int[] getYXFromString(String string) {
         String[] positionStringTab = string.split("");
-        int x = Integer.parseInt(positionStringTab[0]);
-        int y = Integer.parseInt(positionStringTab[1]);
+        int x = string.charAt(0) - CHAR_INT_CONVERSION;
+        int y = Integer.parseInt(positionStringTab[1]) - INDEXING_FROM_1;
         return new int[]{y, x};
     }
 
@@ -60,6 +66,6 @@ public class Position implements Comparable<Position> {
 
     @Override
     public String toString() {
-        return "" + (char) (x + 65) + (y + 1);
+        return "" + (char) (x + CHAR_INT_CONVERSION) + (y + INDEXING_FROM_1);
     }
 }

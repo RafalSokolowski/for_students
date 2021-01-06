@@ -1,6 +1,6 @@
 package day20201220.end_project.figure;
 
-import day20201220.end_project.board.Position;
+import day20201220.end_project.checker.Position;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

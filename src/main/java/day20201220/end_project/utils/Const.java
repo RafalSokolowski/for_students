@@ -21,6 +21,7 @@ public class Const {
     public static final int ELIMINATED = 0;
     public static final int PLAYING = 1;
 
+    public static final int CHECKERBOARD_SIZE = 8;
     public static final int LAST_COORDINATE = 7;
     public static final int FIRST_COORDINATE = 0;
 
@@ -35,4 +36,7 @@ public class Const {
 
     public static final String EMPTY_MESSAGE = "";
     public static final int INVALID_COORDINATE = -1;
+
+    public static final int CHAR_INT_CONVERSION = 65;
+    public static final int INDEXING_FROM_1 = 1;
 }
