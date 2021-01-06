@@ -20,7 +20,7 @@ public class Listener {
      * capturing listener is divided into two separate logics for pawn and dame
      * allPieces is listening for any capturing capabilities for particular player (Dark or Light)
      *
-     * @param darkOrLight
+     * @param darkOrLight for light or dark player
      */
     public void allPieces(int darkOrLight) {
         players.forEach((k, v) -> {
@@ -33,7 +33,7 @@ public class Listener {
     /**
      * singlePieces is listening for capturing capabilities for particular piece (pawn or dame)
      *
-     * @param piece
+     * @param piece for single piece on the board (pawn or dame)
      */
     public void singlePiece(OneFigure piece) {
 
@@ -126,17 +126,13 @@ public class Listener {
         if (isDameMoving(DAME)) {
             List<List<Position>> allDiagonals = getDiagonalsSplitByPosition(position);
 
-            System.out.println(BLUE + position + RESET);
-
             for (List<Position> partDiagonal : allDiagonals) {
-                System.out.println(RED + partDiagonal + RESET);
                 if (partDiagonal.size() >= 2) {
                     for (int i = 0; i < partDiagonal.size() - 1; i++) {
                         if (!partDiagonal.get(i).equals(isGoingToBeRemoved) &&
                                 players.containsKey(partDiagonal.get(i)) &&
                                 players.get(partDiagonal.get(i)).getColor() == opponentColor &&
                                 !players.containsKey(partDiagonal.get(i + 1))) {
-                            System.out.println(YELLOW + partDiagonal.get(i) + RESET);
                             return true;
                         }
                     }
