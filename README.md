@@ -1,8 +1,8 @@
-##for_students/src/main/java/day20201220/end_project/
+## for_students/src/main/java/day20201220/end_project/
 
 Checkers implementation for terminal.
 
-##Start:
+## Start:
 Main class to launch a terminal version. CheckerboardTest to follow 70 movements test game.
 
 ### Description:
@@ -11,7 +11,7 @@ Ex. 111000111 in bites notation stands for light’s player dame placed in H1 (x
 
 The project structure is built around following classes:
 
-###Logics: 
+### Logics: 
 1.	Initialization – to create board and two players (Light and Dark) pieces
 2.	Conditions – where all requirements concerning correct movements are placed (including all necessary information/messages for incorrect data)
 3.	Movement – containing logic for appropriate movement (ex. different behaviour for dame or pawn movement)
@@ -19,19 +19,19 @@ The project structure is built around following classes:
 5.	Checkboard – to combine all the above
 6.	Checkers – to introduce terminal altering play powered by Scanner
 
-###Data:
+### Data:
 7.	Position – where all coordinates are managed
 8.	OneFigure – where full info about single piece is located (ex. 0b111000111)
 9.	SixFigures – where full info about six pieces are located ( ex. 0b100010001_100010011_100010101_100010111_100001000_100001010 = 9_624_268_687_937_802L)
 10.	Key date are kept in three Maps (separate for board, players and capturing movement)
 
-###Utilities:
+### Utilities:
 11.	 Additional utilities in utils package to keep constants (Const), all game messages (Messages) and print the game (Print)
 
-###Tests:
+### Tests:
 12.	To cover flag for correct / incorrect movements and test game with 70-ish movements which is end with Light player win (two checkers left – dame and pawn)
 
-##Rules
+## Rules
 1. Inspired by https://en.wikipedia.org/wiki/Draughts
 2. Key rules:
    - pawn can move only upwards and capture adjacent opponent piece in any direction
